@@ -1,12 +1,8 @@
-#define MyClass_C
+#define MyClass_cxx
 #include "MyClass.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
-#include <iostream>
-#include "selections.h"
-
-using namespace std;
 
 void MyClass::Loop()
 {
@@ -36,7 +32,7 @@ void MyClass::Loop()
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
-      cout<<nentries<<endl;
+
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);

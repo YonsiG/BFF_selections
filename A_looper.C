@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int main()
+void A_looper()
 {
   MyClass m;
   m.Loop();
