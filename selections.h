@@ -1,5 +1,6 @@
 #ifndef _SELECTIONS_H_
 #define _SELECTIONS_H_
+#include <stdbool.h>
 
 bool is_qualified_muon()
 {
