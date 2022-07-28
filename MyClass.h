@@ -3655,7 +3655,7 @@ public :
 
    MyClass(TTree *tree=0);
    virtual ~MyClass();
-   virtual Int_t    Cut(Long64_t entry);
+   virtual Int_t    Cut(Long64_t entry, int year);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
@@ -5558,11 +5558,34 @@ void MyClass::Show(Long64_t entry)
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t MyClass::Cut(Long64_t entry)
+Int_t MyClass::Cut(Long64_t entry, int year)
 {
-// This function may be called from Loop.
-// returns  1 if entry is accepted.
-// returns -1 otherwise.
+   // This function may be called from Loop.
+   // returns  1 if entry is accepted.
+   // returns -1 otherwise.
+
+   //HLT cut
+   bool HLT_pass=0;
+   if ((year==2017 || year==2018) && (HLT_Mu50 || HLT_OldMu100 || HLT_TkMu100)) HLT_pass = 1;
+   if (!HLT_pass) return -1;
+
+   // MET filters
+   if (PV_npvsGood<1) return -1;
+   if (!Flag_globalSuperTightHalo2016Filter) return -1;
+   if (!Flag_HBHENoiseFilter) return -1;
+   if (!Flag_HBHENoiseIsoFilter) return -1;
+   if (!Flag_EcalDeadCellTriggerPrimitiveFilter) return -1;
+   if (!Flag_BadPFMuonFilter) return -1;
+   if (!Flag_BadPFMuonDzFilter) return -1;
+   if (!Flag_eeBadScFilter) return -1;
+   if (year==2016)
+   {
+      if (!Flag_ecalBadCalibFilter) return -1;
+      if (!Flag_hfNoisyHitsFilter) return -1;
+   }
+   
+
+
    return 1;
 }
 #endif // #ifdef MyClass_cxx

@@ -36,15 +36,14 @@ void MyClass::Loop(int year)
 
    Long64_t nbytes = 0, nb = 0;
 
-   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
-   fChain->Process(selector,"",100);
+//   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
+//   fChain->Process(selector,"",100);
    for (Long64_t jentry=0; jentry<100;jentry++) {
 //   for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
-      nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-      // if (Cut(ientry) < 0) continue;
-      cout<<jentry<<endl;
+      nb = fChain->GetEntry(jentry);   nbytes += nb;     
+      if (Cut(ientry, year) < 0) cout<<jentry<<endl; 
+      if (Cut(ientry, year) < 0) continue;
    }
 }
