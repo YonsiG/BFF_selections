@@ -1,10 +1,11 @@
 #define MyClass_cxx
 #include "MyClass.h"
+#include "MySelector.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void MyClass::Loop()
+void MyClass::Loop(int year)
 {
 //   In a ROOT session, you can do:
 //      root> .L MyClass.C
@@ -34,10 +35,16 @@ void MyClass::Loop()
    Long64_t nentries = fChain->GetEntriesFast();
 
    Long64_t nbytes = 0, nb = 0;
-   for (Long64_t jentry=0; jentry<nentries;jentry++) {
+
+   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
+   fChain->Process(selector,"",100);
+   for (Long64_t jentry=0; jentry<100;jentry++) {
+//   for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
+
       // if (Cut(ientry) < 0) continue;
+      cout<<jentry<<endl;
    }
 }
