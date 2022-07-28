@@ -3674,9 +3674,13 @@ MyClass::MyClass(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZToMuMu_M-800To1400_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+
       if (!f || !f->IsOpen()) {
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZToMuMu_M-800To1400_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
          f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+
       }
       f->GetObject("Events",tree);
 
@@ -5618,6 +5622,25 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    }
    if (nMuonMatchedToTrigger<1) return -1;
    
+   // Select Muon pairs
+   TLorentzVector ZPrime;
+   bool HasMuonPairs=0;
+   for (int imuon1=0; imuon1<n_qualified_muons; imuon1++)
+   {
+      for (int imuon2=imuon1; imuon2<n_qualified_muons; imuon2++)
+      {
+         if (Muon_charge[imuon1]*Muon_charge[imuon2] < 0) continue;
+         if (!(MatchedToTriggerMuon[imuon1] || MatchedToTriggerMuon[imuon2])) continue;
+         if (Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect()) > (TMath::Pi()-0.02)) continue;
+         ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
+         if (71.1876 < ZPrime.M() && ZPrime.M()>111.1876) continue;
+         HasMuonPairs = 1;
+         break;
+      }
+      if (HasMuonPairs) break;
+   }
+   if (!(HasMuonPairs)) return -1;
+
    return 1;
 }
 #endif // #ifdef MyClass_cxx
