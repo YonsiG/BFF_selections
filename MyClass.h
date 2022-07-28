@@ -5602,7 +5602,22 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    }
    if (n_qualified_muons<1) return -1;
 
-
+   // Muon matched to trigger
+   bool MatchedToTriggerMuon[12];
+   int nMuonMatchedToTrigger=0;
+   for (int imuon=0; imuon<n_qualified_muons; imuon++)
+   {
+      for (int iTrigObj=0; iTrigObj<nTrigObj; iTrigObj++)
+      {
+         if(fabs(TrigObj_id[iTrigObj])!=13) continue;
+         if(!(TrigObj_filterBits[iTrigObj] & 8)) continue;
+         float dR = sqrt(pow(Selected_Muon[imuon].Eta()-TrigObj_eta[iTrigObj],2) + pow(Selected_Muon[imuon].Phi()-TrigObj_phi[iTrigObj],2));
+         if(dR<0.02) MatchedToTriggerMuon[imuon] = 1;
+      }
+      if (MatchedToTriggerMuon[imuon]) nMuonMatchedToTrigger++;
+   }
+   if (nMuonMatchedToTrigger<1) return -1;
+   
    return 1;
 }
 #endif // #ifdef MyClass_cxx
