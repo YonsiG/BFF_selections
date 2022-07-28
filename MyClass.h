@@ -5566,6 +5566,7 @@ void MyClass::Show(Long64_t entry)
 }
 Int_t MyClass::Cut(Long64_t entry, int year)
 {
+   // This is where we apply all the selections of the analysis from the loop 
    // This function may be called from Loop.
    // returns  1 if entry is accepted.
    // returns -1 otherwise.
@@ -5604,7 +5605,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
       Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
       n_qualified_muons++;
    }
-   if (n_qualified_muons<1) return -1;
+   if (n_qualified_muons<2) return -1;
 
    // Muon matched to trigger
    bool MatchedToTriggerMuon[12];
@@ -5614,7 +5615,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
       for (int iTrigObj=0; iTrigObj<nTrigObj; iTrigObj++)
       {
          if(fabs(TrigObj_id[iTrigObj])!=13) continue;
-         if(!(TrigObj_filterBits[iTrigObj] & 8)) continue;
+         if(!(TrigObj_filterBits[iTrigObj] & 8)) continue; // 8 means 1mu
          float dR = sqrt(pow(Selected_Muon[imuon].Eta()-TrigObj_eta[iTrigObj],2) + pow(Selected_Muon[imuon].Phi()-TrigObj_phi[iTrigObj],2));
          if(dR<0.02) MatchedToTriggerMuon[imuon] = 1;
       }
@@ -5623,23 +5624,29 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    if (nMuonMatchedToTrigger<1) return -1;
    
    // Select Muon pairs
-   TLorentzVector ZPrime;
+   int Mu1_num, Mu2_num;
    bool HasMuonPairs=0;
    for (int imuon1=0; imuon1<n_qualified_muons; imuon1++)
    {
-      for (int imuon2=imuon1; imuon2<n_qualified_muons; imuon2++)
+      for (int imuon2=imuon1+1; imuon2<n_qualified_muons; imuon2++)
       {
          if (Muon_charge[imuon1]*Muon_charge[imuon2] < 0) continue;
          if (!(MatchedToTriggerMuon[imuon1] || MatchedToTriggerMuon[imuon2])) continue;
-         if (Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect()) > (TMath::Pi()-0.02)) continue;
-         ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
-         if (71.1876 < ZPrime.M() && ZPrime.M()>111.1876) continue;
+         if (Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect()) > (TMath::Pi()-0.02)) continue; //reduce cosmic ray background
+         TLorentzVector ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
+         if (71.1876 < ZPrime.M() && ZPrime.M()<111.1876) continue;
          HasMuonPairs = 1;
+         Mu1_num = imuon1;
+         Mu2_num = imuon2;
          break;
       }
       if (HasMuonPairs) break;
    }
    if (!(HasMuonPairs)) return -1;
+
+   // Mmumu>175GeV
+   TLorentzVector ZPrime = Selected_Muon[Mu1_num]+Selected_Muon[Mu2_num];
+   if (ZPrime.M()<175) return -1;
 
    return 1;
 }
