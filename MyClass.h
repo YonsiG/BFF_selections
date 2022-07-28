@@ -11,6 +11,8 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <cmath>
+#include <math.h>
 
 // Header file for the classes stored in the TTree if any.
 
@@ -5564,7 +5566,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    // returns  1 if entry is accepted.
    // returns -1 otherwise.
 
-   //HLT cut
+   // HLT cut
    bool HLT_pass=0;
    if ((year==2017 || year==2018) && (HLT_Mu50 || HLT_OldMu100 || HLT_TkMu100)) HLT_pass = 1;
    if (!HLT_pass) return -1;
@@ -5578,12 +5580,27 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    if (!Flag_BadPFMuonFilter) return -1;
    if (!Flag_BadPFMuonDzFilter) return -1;
    if (!Flag_eeBadScFilter) return -1;
-   if (year==2016)
+   if (year==2017 || year==2018)
    {
       if (!Flag_ecalBadCalibFilter) return -1;
       if (!Flag_hfNoisyHitsFilter) return -1;
    }
-   
+
+   // single Muon selection
+   int n_qualified_muons=0;
+   TLorentzVector Selected_Muon[12];
+   for (int imuon=0; imuon<nMuon; imuon++){
+      if (!(Muon_highPtId[imuon]>=2)) continue;
+      if (!(fabs(Muon_dxy[imuon])<0.02)) continue;
+      if (!(fabs(Muon_dz[imuon])<0.1)) continue;
+      if (!(Muon_pt[imuon]>53)) continue;
+      if (!(fabs(Muon_eta[imuon])<2.4)) continue;
+      if (!(Muon_tkRelIso[imuon]<0.05)) continue;
+      if (!((Muon_tkRelIso[imuon]*Muon_pt[imuon])<5)) continue;
+      Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
+      n_qualified_muons++;
+   }
+   if (n_qualified_muons<1) return -1;
 
 
    return 1;

@@ -1,6 +1,5 @@
 #define MyClass_cxx
 #include "MyClass.h"
-#include "MySelector.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -42,7 +41,8 @@ void MyClass::Loop(int year)
 //   for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
-      nb = fChain->GetEntry(jentry);   nbytes += nb;     
+      nb = fChain->GetEntry(jentry);   
+      nbytes += nb;     
       if (Cut(ientry, year) < 0) cout<<jentry<<endl; 
       if (Cut(ientry, year) < 0) continue;
    }
