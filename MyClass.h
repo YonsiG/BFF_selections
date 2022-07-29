@@ -5595,15 +5595,17 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    int n_qualified_muons=0;
    TLorentzVector Selected_Muon[12];
    for (int imuon=0; imuon<nMuon; imuon++){
-      if (!(Muon_highPtId[imuon]>=2)) continue;
-      if (!(fabs(Muon_dxy[imuon])<0.02)) continue;
-      if (!(fabs(Muon_dz[imuon])<0.1)) continue;
-      if (!(Muon_pt[imuon]>53)) continue;
-      if (!(fabs(Muon_eta[imuon])<2.4)) continue;
-      if (!(Muon_tkRelIso[imuon]<0.05)) continue;
-      if (!((Muon_tkRelIso[imuon]*Muon_pt[imuon])<5)) continue;
-      Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
-      n_qualified_muons++;
+      if (Muon_highPtId[imuon]>=2 &&
+         fabs(Muon_dxy[imuon])<0.02 &&
+         fabs(Muon_dz[imuon])<0.1 &&
+         Muon_pt[imuon]>53 &&
+         fabs(Muon_eta[imuon])<2.4 &&
+         Muon_tkRelIso[imuon]<0.05 &&
+         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5)
+      {
+         Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
+         n_qualified_muons++;
+      }
    }
    if (n_qualified_muons<2) return -1;
 
@@ -5647,6 +5649,60 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    // Mmumu>175GeV
    TLorentzVector ZPrime = Selected_Muon[Mu1_num]+Selected_Muon[Mu2_num];
    if (ZPrime.M()<175) return -1;
+
+   // No extra electrons
+   bool hasExtraElectron=0;
+   for (int ielectron=0; ielectron<nElectron; ielectron++)
+   {
+      if ( Electron_pt[ielectron]>10 &&
+         fabs(Electron_eta[ielectron])<2.5 &&
+         Electron_cutBased[ielectron]>0 &&
+         Electron_miniPFRelIso_all[ielectron]<0.1 &&
+         fabs(Electron_dxy[ielectron])<0.2 &&
+         fabs(Electron_dz[ielectron])<0.5 
+      ) hasExtraElectron = 1;
+   }
+   if (hasExtraElectron) return -1;
+
+   // No extra muons
+   bool hasExtraMuon = 0;
+   for (int imuon=0; imuon<nMuon; imuon++)
+   {
+      if (Muon_pt[imuon]>10 &&
+         fabs(Muon_eta[imuon])<2.4 &&
+         Muon_isGlobal[imuon] &&
+         Muon_isTracker[imuon] &&
+         Muon_highPtId[imuon]>=2 &&
+         fabs(Muon_dxy[imuon])<0.02 &&
+         fabs(Muon_dz[imuon])<0.1 &&
+         Muon_tkRelIso[imuon]<0.05 &&
+         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5 &&
+         imuon != Mu1_num &&
+         imuon != Mu2_num
+      ) {hasExtraMuon = 1; cout<<nMuon<<" "<<n_qualified_muons<<" "<<imuon<<" "<<Mu1_num<<" "<<Mu2_num<<endl;}
+   }
+   if(hasExtraMuon) return -1;
+
+   // No extra isotracks
+   bool hasIsoTrack=0;
+   // 1.Isolated leptons
+   for (int iIso=0; iIso<nIsoTrack; iIso++)
+   {
+      if (fabs(IsoTrack_pdgId[iIso])==11 || fabs(IsoTrack_pdgId[iIso])==13)
+      {
+         float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[0].Phi()-IsoTrack_phi[iIso],2));
+         float dR2 = sqrt(pow(Selected_Muon[1].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[1].Phi()-IsoTrack_phi[iIso],2));
+         if (fabs(IsoTrack_eta[iIso])<2.5 &&
+            IsoTrack_pt[iIso]>5 &&
+            IsoTrack_pfRelIso03_chg[iIso]<0.2 &&
+            fabs(IsoTrack_dxy[iIso])<0.2 &&
+            fabs(IsoTrack_dz[iIso])<0.1 &&
+            dR1 > 0.3 &&
+            dR2 > 0.3 
+         ) hasIsoTrack=1;
+      }
+   }
+   if(hasIsoTrack) return -1;
 
    return 1;
 }
