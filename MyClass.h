@@ -5632,7 +5632,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    {
       for (int imuon2=imuon1+1; imuon2<n_qualified_muons; imuon2++)
       {
-         if (Muon_charge[imuon1]*Muon_charge[imuon2] < 0) continue;
+         if (Muon_charge[imuon1]*Muon_charge[imuon2] > 0) continue;
          if (!(MatchedToTriggerMuon[imuon1] || MatchedToTriggerMuon[imuon2])) continue;
          if (Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect()) > (TMath::Pi()-0.02)) continue; //reduce cosmic ray background
          TLorentzVector ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
@@ -5679,9 +5679,38 @@ Int_t MyClass::Cut(Long64_t entry, int year)
          Muon_tkRelIso[imuon]*Muon_pt[imuon]<5 &&
          imuon != Mu1_num &&
          imuon != Mu2_num
-      ) {hasExtraMuon = 1; cout<<nMuon<<" "<<n_qualified_muons<<" "<<imuon<<" "<<Mu1_num<<" "<<Mu2_num<<endl;}
+      ) {hasExtraMuon = 1;}// cout<<nMuon<<" "<<n_qualified_muons<<" "<<imuon<<" "<<Mu1_num<<" "<<Mu2_num<<Muon_pt[imuon]<<endl;
    }
    if(hasExtraMuon) return -1;
+/*
+//debug count muon
+int count_muon1=0;
+   for (int imuon=0; imuon<nMuon; imuon++){
+      if (Muon_highPtId[imuon]>=2 &&
+         fabs(Muon_dxy[imuon])<0.02 &&
+         fabs(Muon_dz[imuon])<0.1 &&
+         Muon_pt[imuon]>53 &&
+         fabs(Muon_eta[imuon])<2.4 &&
+         Muon_tkRelIso[imuon]<0.05 &&
+         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5)
+         {count_muon1++;cout<<imuon;}
+   }
+int count_muon2=0;
+   for (int imuon=0; imuon<nMuon; imuon++)
+   {
+      if (Muon_pt[imuon]>10 &&
+         fabs(Muon_eta[imuon])<2.4 &&
+         Muon_isGlobal[imuon] &&
+         Muon_isTracker[imuon] &&
+         Muon_highPtId[imuon]>=2 &&
+         fabs(Muon_dxy[imuon])<0.02 &&
+         fabs(Muon_dz[imuon])<0.1 &&
+         Muon_tkRelIso[imuon]<0.05 &&
+         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5
+      ) {count_muon2++;cout<<imuon;}
+   }
+   cout<<Mu1_num<<Mu2_num<<count_muon1<<count_muon2<<endl;
+*/
 
    // No extra isotracks
    bool hasIsoTrack=0;
@@ -5695,6 +5724,19 @@ Int_t MyClass::Cut(Long64_t entry, int year)
          if (fabs(IsoTrack_eta[iIso])<2.5 &&
             IsoTrack_pt[iIso]>5 &&
             IsoTrack_pfRelIso03_chg[iIso]<0.2 &&
+            fabs(IsoTrack_dxy[iIso])<0.2 &&
+            fabs(IsoTrack_dz[iIso])<0.1 &&
+            dR1 > 0.3 &&
+            dR2 > 0.3 
+         ) hasIsoTrack=1;
+      }
+      if (fabs(IsoTrack_pdgId[iIso])==211)
+      {
+         float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[0].Phi()-IsoTrack_phi[iIso],2));
+         float dR2 = sqrt(pow(Selected_Muon[1].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[1].Phi()-IsoTrack_phi[iIso],2));
+         if (fabs(IsoTrack_eta[iIso])<2.5 &&
+            IsoTrack_pt[iIso]>10 &&
+            IsoTrack_pfRelIso03_chg[iIso]<0.1 &&
             fabs(IsoTrack_dxy[iIso])<0.2 &&
             fabs(IsoTrack_dz[iIso])<0.1 &&
             dR1 > 0.3 &&
