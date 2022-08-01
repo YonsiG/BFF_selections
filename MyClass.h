@@ -5746,6 +5746,76 @@ int count_muon2=0;
    }
    if(hasIsoTrack) return -1;
 
+   // at least 1 bjet
+   float tight_point, medium_point, loose_point;
+   if (year==2018) 
+   {
+      tight_point = 0.7100;
+      medium_point = 0.2783;
+      loose_point = 0.0490;
+   }
+   int n_tight_bjets=0, n_medium_bjets=0, n_fail_medium_bjets;
+   TLorentzVector bjets_tight[86],bjets_medium[86];
+   for (int ibjet=0; ibjet<nJet; ibjet++)
+   {
+      TLorentzVector bjet;
+      if (Jet_jetId[ibjet]<=1) continue;
+      if (Jet_pt[ibjet]<20 || fabs(Jet_eta[ibjet])>2.5) continue;
+      bjet.SetPtEtaPhiM(Jet_pt[ibjet],Jet_eta[ibjet],Jet_phi[ibjet],Jet_mass[ibjet]);
+      if (bjet.DeltaR(Selected_Muon[0])<0.4 || bjet.DeltaR(Selected_Muon[1])<0.4) continue;
+      if (Jet_btagDeepFlavB[ibjet]>tight_point) 
+      {
+         bjets_tight[n_tight_bjets] = bjet;
+         n_tight_bjets++;
+      }
+      if (Jet_btagDeepFlavB[ibjet]>medium_point) 
+      {
+         bjets_medium[n_medium_bjets] = bjet;
+         n_medium_bjets++;
+      }
+      if (Jet_btagDeepFlavB[ibjet]<medium_point) 
+      {
+         n_fail_medium_bjets++;
+      }
+   }
+   /*
+   cout<<n_tight_bjets<<" ";
+   cout<<n_medium_bjets<<" ";
+   cout<<n_fail_medium_bjets<<endl;
+   */
+   if (n_tight_bjets<1) return -1;
+
+   //MET cut
+   float minDPhi=5, maxDPhi=0;
+   for (int imuon=0; imuon<n_qualified_muons; imuon++)
+   {
+      float dPhi = fabs(PuppiMET_phi-Selected_Muon[imuon].Phi());
+      if (dPhi<minDPhi) minDPhi = dPhi;
+      if (dPhi>maxDPhi) maxDPhi = dPhi;
+   }
+   for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
+   {
+      float dPhi = fabs(PuppiMET_phi-bjets_medium[ibjet].Phi());
+      if (dPhi<minDPhi) minDPhi = dPhi;
+      if (dPhi>maxDPhi) maxDPhi = dPhi;
+   }
+   if (minDPhi<0.3 || maxDPhi>TMath::Pi()-0.3)
+   {
+      if (PuppiMET_pt>250) return -1;
+   }
+
+   //min_mlb cut
+   float min_mlb=999;
+   for (int imuon=0; imuon<n_qualified_muons; imuon++)
+   {
+      for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
+      {
+         int mlb = (Selected_Muon[imuon]+bjets_medium[ibjet]).M();
+         if (mlb<min_mlb) min_mlb = mlb;
+      }
+   }
+   if (min_mlb<175) return -1;
+
    return 1;
 }
 #endif // #ifdef MyClass_cxx
