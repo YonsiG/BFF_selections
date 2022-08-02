@@ -3657,11 +3657,11 @@ public :
 
    MyClass(TTree *tree=0);
    virtual ~MyClass();
-   virtual Int_t    Cut(Long64_t entry, int year);
+   virtual Int_t    Cut(Long64_t entry, TString year);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(int year);
+   virtual void     Loop(TString year);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -5568,7 +5568,7 @@ void MyClass::Show(Long64_t entry)
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t MyClass::Cut(Long64_t entry, int year)
+Int_t MyClass::Cut(Long64_t entry, TString year)
 {
    // This is where we apply all the selections of the analysis from the loop 
    // This function may be called from Loop.
@@ -5577,12 +5577,13 @@ Int_t MyClass::Cut(Long64_t entry, int year)
 
    // HLT cut
    bool HLT_pass=0;
-   if ((year==2017 || year==2018) && (HLT_Mu50 || HLT_OldMu100 || HLT_TkMu100)) HLT_pass = 1;
+   if ((year=="2017" || year=="2018") && (HLT_Mu50 || HLT_OldMu100 || HLT_TkMu100)) HLT_pass = 1;
    if (!HLT_pass) return -1;
 
    // MET filters
    // applied according to https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#2018_2017_data_and_MC_UL
    if (PV_npvsGood<1) return -1;
+   if (!Flag_goodVertices) return -1; // this is actually redundant, we have npvsGood >=1 requirement
    if (!Flag_globalSuperTightHalo2016Filter) return -1;
    if (!Flag_HBHENoiseFilter) return -1;
    if (!Flag_HBHENoiseIsoFilter) return -1;
@@ -5590,11 +5591,16 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    if (!Flag_BadPFMuonFilter) return -1;
    if (!Flag_BadPFMuonDzFilter) return -1;
    if (!Flag_eeBadScFilter) return -1;
-   if (year==2017 || year==2018)
+   if (year=="2017" || year=="2018")
    {
       if (!Flag_ecalBadCalibFilter) return -1;
       if (!Flag_hfNoisyHitsFilter) return -1;
    }
+
+   // check that muons, jets, puppiMET are all valid numbers
+   	if (isinf(PuppiMET_pt)||isnan(PuppiMET_pt)) return -1;
+      if (nJet>0 && Jet_pt[0]>13000.0) return -1;
+      if (nMuon>0 && Muon_pt[0]>13000.0) return -1;
 
    // single Muon selection
    int n_qualified_muons=0;
@@ -5638,7 +5644,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
       if (MatchedToTriggerMuon[imuon]) nMuonMatchedToTrigger++;
    }
    if (nMuonMatchedToTrigger<1) return -1;
-
+return 1;
    // Select Muon pairs
    int Mu1_num=-1, Mu2_num=-1;
    bool HasMuonPairs=0;
@@ -5759,17 +5765,23 @@ int count_muon2=0;
       }
    }
    if(hasIsoTrack) return -1;
-return 1;
+
    // at least 1 bjet
    float tight_point, medium_point, loose_point;
    // working point recommendation as btag POG https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
-   if (year==2018) 
+   if (year=="2016") 
    {
-      tight_point = 0.7100;
-      medium_point = 0.2783;
-      loose_point = 0.0490;
+      tight_point = 0.7221;
+      medium_point = 0.3093;
+      loose_point = 0.0614;
    }
-   if (year==2018) 
+   if (year=="2017") 
+   {
+      tight_point = 0.7476;
+      medium_point = 0.3040;
+      loose_point = 0.0532;
+   }
+   if (year=="2018") 
    {
       tight_point = 0.7100;
       medium_point = 0.2783;
@@ -5808,6 +5820,7 @@ return 1;
 
    //MET cut
    //since we use TuneP for muons, the MET is affected accordingly
+   //we apply MET cut because if a large MET is aligned or anti-aligned with out muons/bjets, that means our muon/bjet(visible object) PT reconstruction maybe very bad
    TVector2 MET_tuned;
    MET_tuned.SetMagPhi(PuppiMET_pt, PuppiMET_phi);
    MET_tuned = MET_tuned+Muon_origin[0]+Muon_origin[1]-Muon_tuned[0]-Muon_tuned[1];

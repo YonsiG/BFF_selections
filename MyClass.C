@@ -4,7 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void MyClass::Loop(int year)
+void MyClass::Loop(TString year)
 {
 //   In a ROOT session, you can do:
 //      root> .L MyClass.C
@@ -39,12 +39,12 @@ void MyClass::Loop(int year)
 //   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
 //   fChain->Process(selector,"",100);
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-//   for (Long64_t jentry=0; jentry<3000;jentry++) { //for a few numbers debugging
+//   for (Long64_t jentry=0; jentry<8000;jentry++) { //for a few numbers debugging
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   
       nbytes += nb;     
-      if (Cut(ientry, year) > 0) {/*cout<<jentry<<endl;*/ total_numbers++;} 
+      if (Cut(ientry, year) > 0) {cout<<jentry<<endl; total_numbers++;} 
       if (Cut(ientry, year) == 1) Nbjet1++;
       if (Cut(ientry, year) >=2) Nbjet2++;
       if (Cut(ientry, year) < 0) continue;
