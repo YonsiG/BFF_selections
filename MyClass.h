@@ -3674,13 +3674,17 @@ MyClass::MyClass(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZToMuMu_M-800To1400_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); //2018
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M700_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M1500_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2017
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2016APV
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2016 nonAPV
 
       if (!f || !f->IsOpen()) {
-//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZToMuMu_M-800To1400_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
          f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
-
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M700_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M1500_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
       }
       f->GetObject("Events",tree);
 
@@ -5577,6 +5581,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    if (!HLT_pass) return -1;
 
    // MET filters
+   // applied according to https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#2018_2017_data_and_MC_UL
    if (PV_npvsGood<1) return -1;
    if (!Flag_globalSuperTightHalo2016Filter) return -1;
    if (!Flag_HBHENoiseFilter) return -1;
@@ -5594,60 +5599,69 @@ Int_t MyClass::Cut(Long64_t entry, int year)
    // single Muon selection
    int n_qualified_muons=0;
    TLorentzVector Selected_Muon[12];
+   int Selected_Muon_charge[12]; // stored for construct muon pairs and use opposite sign
+   int Selected_Muon_index[12]; // store the index of qualified muons
+   TVector2 Muon_origin[2], Muon_tuned[2]; // this is for w/ and w/o tuneP 
    for (int imuon=0; imuon<nMuon; imuon++){
       if (Muon_highPtId[imuon]>=2 &&
          fabs(Muon_dxy[imuon])<0.02 &&
          fabs(Muon_dz[imuon])<0.1 &&
-         Muon_pt[imuon]>53 &&
+         Muon_tunepRelPt[imuon]*Muon_pt[imuon]>53 && // here we are using TuneP pt for muons, this also affects the MET since the muon_pt is not accurate
          fabs(Muon_eta[imuon])<2.4 &&
          Muon_tkRelIso[imuon]<0.05 &&
          Muon_tkRelIso[imuon]*Muon_pt[imuon]<5)
       {
-         Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
+         Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
+         Selected_Muon_charge[n_qualified_muons] = Muon_charge[imuon];
+         Selected_Muon_index[n_qualified_muons] = imuon;
+         Muon_origin[n_qualified_muons].SetMagPhi(Muon_pt[imuon], Muon_phi[imuon]);
+         Muon_tuned[n_qualified_muons].SetMagPhi(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_phi[imuon]);
          n_qualified_muons++;
       }
    }
    if (n_qualified_muons<2) return -1;
 
    // Muon matched to trigger
-   bool MatchedToTriggerMuon[12];
+   bool MatchedToTriggerMuon[12]; //although set it to 12(nMuons), we actually only fill the first several with selected muon.
    int nMuonMatchedToTrigger=0;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)
    {
+      MatchedToTriggerMuon[imuon]=0;
       for (int iTrigObj=0; iTrigObj<nTrigObj; iTrigObj++)
       {
          if(fabs(TrigObj_id[iTrigObj])!=13) continue;
-         if(!(TrigObj_filterBits[iTrigObj] & 8)) continue; // 8 means 1mu
-         float dR = sqrt(pow(Selected_Muon[imuon].Eta()-TrigObj_eta[iTrigObj],2) + pow(Selected_Muon[imuon].Phi()-TrigObj_phi[iTrigObj],2));
+         if(!(TrigObj_filterBits[iTrigObj] & 8)) continue; // 8 means 1mu https://cms-nanoaod-integration.web.cern.ch/integration/cms-swCMSSW_10_6_19/mc102X_doc.html#TrigObj
+         float dPhi = TVector2::Phi_mpi_pi(Selected_Muon[imuon].Phi()-TrigObj_phi[iTrigObj]);
+         float dR = sqrt(pow(Selected_Muon[imuon].Eta()-TrigObj_eta[iTrigObj],2) + pow(dPhi,2));
          if(dR<0.02) MatchedToTriggerMuon[imuon] = 1;
       }
       if (MatchedToTriggerMuon[imuon]) nMuonMatchedToTrigger++;
    }
    if (nMuonMatchedToTrigger<1) return -1;
-   
+
    // Select Muon pairs
-   int Mu1_num, Mu2_num;
+   int Mu1_num=-1, Mu2_num=-1;
    bool HasMuonPairs=0;
+   TLorentzVector ZPrime;
    for (int imuon1=0; imuon1<n_qualified_muons; imuon1++)
    {
       for (int imuon2=imuon1+1; imuon2<n_qualified_muons; imuon2++)
       {
-         if (Muon_charge[imuon1]*Muon_charge[imuon2] > 0) continue;
+         if (Selected_Muon_charge[imuon1]+Selected_Muon_charge[imuon2] != 0) continue;  
          if (!(MatchedToTriggerMuon[imuon1] || MatchedToTriggerMuon[imuon2])) continue;
-         if (Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect()) > (TMath::Pi()-0.02)) continue; //reduce cosmic ray background
-         TLorentzVector ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
-         if (71.1876 < ZPrime.M() && ZPrime.M()<111.1876) continue;
+         if (fabs(Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect())) > (TMath::Pi()-0.02)) continue; //reduce cosmic ray background
+         ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
          HasMuonPairs = 1;
-         Mu1_num = imuon1;
-         Mu2_num = imuon2;
+         Mu1_num = Selected_Muon_index[imuon1];
+         Mu2_num = Selected_Muon_index[imuon2];
          break;
       }
       if (HasMuonPairs) break;
    }
+   if (71.1876 < ZPrime.M() && ZPrime.M()<111.1876) return -1;
    if (!(HasMuonPairs)) return -1;
 
    // Mmumu>175GeV
-   TLorentzVector ZPrime = Selected_Muon[Mu1_num]+Selected_Muon[Mu2_num];
    if (ZPrime.M()<175) return -1;
 
    // No extra electrons
@@ -5679,7 +5693,7 @@ Int_t MyClass::Cut(Long64_t entry, int year)
          Muon_tkRelIso[imuon]*Muon_pt[imuon]<5 &&
          imuon != Mu1_num &&
          imuon != Mu2_num
-      ) {hasExtraMuon = 1;}// cout<<nMuon<<" "<<n_qualified_muons<<" "<<imuon<<" "<<Mu1_num<<" "<<Mu2_num<<Muon_pt[imuon]<<endl;
+      ) {hasExtraMuon = 1;}
    }
    if(hasExtraMuon) return -1;
 /*
@@ -5709,14 +5723,13 @@ int count_muon2=0;
          Muon_tkRelIso[imuon]*Muon_pt[imuon]<5
       ) {count_muon2++;cout<<imuon;}
    }
-   cout<<Mu1_num<<Mu2_num<<count_muon1<<count_muon2<<endl;
 */
 
    // No extra isotracks
    bool hasIsoTrack=0;
-   // 1.Isolated leptons
    for (int iIso=0; iIso<nIsoTrack; iIso++)
    {
+      // 1.Isolated leptons
       if (fabs(IsoTrack_pdgId[iIso])==11 || fabs(IsoTrack_pdgId[iIso])==13)
       {
          float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[0].Phi()-IsoTrack_phi[iIso],2));
@@ -5730,6 +5743,7 @@ int count_muon2=0;
             dR2 > 0.3 
          ) hasIsoTrack=1;
       }
+      // 2.Isolated hadrons
       if (fabs(IsoTrack_pdgId[iIso])==211)
       {
          float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[0].Phi()-IsoTrack_phi[iIso],2));
@@ -5745,9 +5759,16 @@ int count_muon2=0;
       }
    }
    if(hasIsoTrack) return -1;
-
+return 1;
    // at least 1 bjet
    float tight_point, medium_point, loose_point;
+   // working point recommendation as btag POG https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
+   if (year==2018) 
+   {
+      tight_point = 0.7100;
+      medium_point = 0.2783;
+      loose_point = 0.0490;
+   }
    if (year==2018) 
    {
       tight_point = 0.7100;
@@ -5786,22 +5807,27 @@ int count_muon2=0;
    if (n_tight_bjets<1) return -1;
 
    //MET cut
+   //since we use TuneP for muons, the MET is affected accordingly
+   TVector2 MET_tuned;
+   MET_tuned.SetMagPhi(PuppiMET_pt, PuppiMET_phi);
+   MET_tuned = MET_tuned+Muon_origin[0]+Muon_origin[1]-Muon_tuned[0]-Muon_tuned[1];
+
    float minDPhi=5, maxDPhi=0;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)
    {
-      float dPhi = fabs(PuppiMET_phi-Selected_Muon[imuon].Phi());
+      float dPhi = fabs(MET_tuned.Phi()-Selected_Muon[imuon].Phi());
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }
    for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
    {
-      float dPhi = fabs(PuppiMET_phi-bjets_medium[ibjet].Phi());
+      float dPhi = fabs(MET_tuned.Phi()-bjets_medium[ibjet].Phi());
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }
    if (minDPhi<0.3 || maxDPhi>TMath::Pi()-0.3)
    {
-      if (PuppiMET_pt>250) return -1;
+      if (MET_tuned.Mod()>250) return -1;
    }
 
    //min_mlb cut
@@ -5816,6 +5842,8 @@ int count_muon2=0;
    }
    if (min_mlb<175) return -1;
 
-   return 1;
+   // return the number of bjets as categorization
+   return n_medium_bjets;
+//   return 1;
 }
 #endif // #ifdef MyClass_cxx
