@@ -3657,7 +3657,7 @@ public :
 
    MyClass(TTree *tree=0);
    virtual ~MyClass();
-   virtual Int_t    Cut(Long64_t entry, TString year);
+   virtual Int_t    Cut(Long64_t entry, TString year, Long64_t* cut_numbers);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
@@ -5568,7 +5568,7 @@ void MyClass::Show(Long64_t entry)
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t MyClass::Cut(Long64_t entry, TString year)
+Int_t MyClass::Cut(Long64_t entry, TString year, Long64_t* cut_numbers)
 {
    // This is where we apply all the selections of the analysis from the loop 
    // This function may be called from Loop.
@@ -5579,7 +5579,7 @@ Int_t MyClass::Cut(Long64_t entry, TString year)
    bool HLT_pass=0;
    if ((year=="2017" || year=="2018") && (HLT_Mu50 || HLT_OldMu100 || HLT_TkMu100)) HLT_pass = 1;
    if (!HLT_pass) return -1;
-
+cut_numbers[0]++;
    // MET filters
    // applied according to https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#2018_2017_data_and_MC_UL
    if (PV_npvsGood<1) return -1;
@@ -5596,12 +5596,12 @@ Int_t MyClass::Cut(Long64_t entry, TString year)
       if (!Flag_ecalBadCalibFilter) return -1;
       if (!Flag_hfNoisyHitsFilter) return -1;
    }
-
+cut_numbers[1]++;
    // check that muons, jets, puppiMET are all valid numbers
    	if (isinf(PuppiMET_pt)||isnan(PuppiMET_pt)) return -1;
       if (nJet>0 && Jet_pt[0]>13000.0) return -1;
       if (nMuon>0 && Muon_pt[0]>13000.0) return -1;
-
+cut_numbers[2]++;
    // single Muon selection
    int n_qualified_muons=0;
    TLorentzVector Selected_Muon[12];
@@ -5626,7 +5626,7 @@ Int_t MyClass::Cut(Long64_t entry, TString year)
       }
    }
    if (n_qualified_muons<2) return -1;
-
+return 1;
    // Muon matched to trigger
    bool MatchedToTriggerMuon[12]; //although set it to 12(nMuons), we actually only fill the first several with selected muon.
    int nMuonMatchedToTrigger=0;
@@ -5637,14 +5637,14 @@ Int_t MyClass::Cut(Long64_t entry, TString year)
       {
          if(fabs(TrigObj_id[iTrigObj])!=13) continue;
          if(!(TrigObj_filterBits[iTrigObj] & 8)) continue; // 8 means 1mu https://cms-nanoaod-integration.web.cern.ch/integration/cms-swCMSSW_10_6_19/mc102X_doc.html#TrigObj
-         float dPhi = TVector2::Phi_mpi_pi(Selected_Muon[imuon].Phi()-TrigObj_phi[iTrigObj]);
-         float dR = sqrt(pow(Selected_Muon[imuon].Eta()-TrigObj_eta[iTrigObj],2) + pow(dPhi,2));
+         float dPhi = TVector2::Phi_mpi_pi(Selected_Muon[imuon].Phi()-TrigObj_phi[iTrigObj]); //Phi_mpi_pi only returns numbers between [-Pi,Pi)
+         float dR = sqrt(pow(Selected_Muon[imuon].Eta()-TrigObj_eta[iTrigObj],2) + pow(dPhi,2)); //for Phi_mpi_pi https://root.cern.ch/doc/master/classTVector2.html#ad30d7548d7a2562d86cd8d1597460a44
          if(dR<0.02) MatchedToTriggerMuon[imuon] = 1;
       }
       if (MatchedToTriggerMuon[imuon]) nMuonMatchedToTrigger++;
    }
    if (nMuonMatchedToTrigger<1) return -1;
-return 1;
+//different already
    // Select Muon pairs
    int Mu1_num=-1, Mu2_num=-1;
    bool HasMuonPairs=0;
@@ -5738,8 +5738,10 @@ int count_muon2=0;
       // 1.Isolated leptons
       if (fabs(IsoTrack_pdgId[iIso])==11 || fabs(IsoTrack_pdgId[iIso])==13)
       {
-         float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[0].Phi()-IsoTrack_phi[iIso],2));
-         float dR2 = sqrt(pow(Selected_Muon[1].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[1].Phi()-IsoTrack_phi[iIso],2));
+         float dPhi1 = TVector2::Phi_mpi_pi(Selected_Muon[0].Phi()-IsoTrack_phi[iIso]);
+         float dPhi2 = TVector2::Phi_mpi_pi(Selected_Muon[1].Phi()-IsoTrack_phi[iIso]);
+         float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(dPhi1,2));
+         float dR2 = sqrt(pow(Selected_Muon[1].Eta()-IsoTrack_eta[iIso],2)+pow(dPhi2,2));
          if (fabs(IsoTrack_eta[iIso])<2.5 &&
             IsoTrack_pt[iIso]>5 &&
             IsoTrack_pfRelIso03_chg[iIso]<0.2 &&
@@ -5752,8 +5754,10 @@ int count_muon2=0;
       // 2.Isolated hadrons
       if (fabs(IsoTrack_pdgId[iIso])==211)
       {
-         float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[0].Phi()-IsoTrack_phi[iIso],2));
-         float dR2 = sqrt(pow(Selected_Muon[1].Eta()-IsoTrack_eta[iIso],2)+pow(Selected_Muon[1].Phi()-IsoTrack_phi[iIso],2));
+         float dPhi1 = TVector2::Phi_mpi_pi(Selected_Muon[0].Phi()-IsoTrack_phi[iIso]);
+         float dPhi2 = TVector2::Phi_mpi_pi(Selected_Muon[1].Phi()-IsoTrack_phi[iIso]);
+         float dR1 = sqrt(pow(Selected_Muon[0].Eta()-IsoTrack_eta[iIso],2)+pow(dPhi1,2));
+         float dR2 = sqrt(pow(Selected_Muon[1].Eta()-IsoTrack_eta[iIso],2)+pow(dPhi2,2));
          if (fabs(IsoTrack_eta[iIso])<2.5 &&
             IsoTrack_pt[iIso]>10 &&
             IsoTrack_pfRelIso03_chg[iIso]<0.1 &&
@@ -5828,13 +5832,13 @@ int count_muon2=0;
    float minDPhi=5, maxDPhi=0;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)
    {
-      float dPhi = fabs(MET_tuned.Phi()-Selected_Muon[imuon].Phi());
+      float dPhi = TVector2::Phi_mpi_pi(MET_tuned.Phi()-Selected_Muon[imuon].Phi());
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }
    for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
    {
-      float dPhi = fabs(MET_tuned.Phi()-bjets_medium[ibjet].Phi());
+      float dPhi = TVector2::Phi_mpi_pi(MET_tuned.Phi()-bjets_medium[ibjet].Phi());
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }

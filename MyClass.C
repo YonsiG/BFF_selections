@@ -35,6 +35,8 @@ void MyClass::Loop(TString year)
 
    Long64_t nbytes = 0, nb = 0;
    Long64_t total_numbers = 0, Nbjet1=0, Nbjet2=0;
+   Long64_t cut_numbers[11];
+   for(Long64_t i=0; i<11; i++) cut_numbers[i]=0;
 
 //   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
 //   fChain->Process(selector,"",100);
@@ -43,14 +45,18 @@ void MyClass::Loop(TString year)
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   
-      nbytes += nb;     
-      if (Cut(ientry, year) > 0) {cout<<jentry<<endl; total_numbers++;} 
-      if (Cut(ientry, year) == 1) Nbjet1++;
-      if (Cut(ientry, year) >=2) Nbjet2++;
-      if (Cut(ientry, year) < 0) continue;
+      nbytes += nb;  
+      int Cut_Return = Cut(ientry, year, cut_numbers);   
+      if (Cut_Return > 0) {cout<<jentry<<endl; total_numbers++;} 
+      if (Cut_Return == 1) Nbjet1++;
+      if (Cut_Return >=2) Nbjet2++;
+      if (Cut_Return < 0) continue;
    }
    cout<<"Nentries: "<<nentries<<endl;;
    cout<<"Pass Cut: "<<total_numbers<<endl;
    cout<<"Nb=1: "<<Nbjet1<<endl;
    cout<<"Nb>=2: "<<Nbjet2<<endl;
+   cout<<"HLT: "<<cut_numbers[0]<<endl; 
+   cout<<"Trigger: "<<cut_numbers[1]<<endl; 
+   cout<<"Noise: "<<cut_numbers[2]<<endl; 
 }
