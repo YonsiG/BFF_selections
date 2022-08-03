@@ -5611,7 +5611,7 @@ cut_numbers[2]++;
    int Selected_Muon_charge[12]; // stored for construct muon pairs and use opposite sign
    int Selected_Muon_pdgId[12]; // stored for construct muon pairs and use opposite sign
    int Selected_Muon_index[12]; // store the index of qualified muons
-   TVector2 Muon_origin[2], Muon_tuned[2]; // this is for w/ and w/o tuneP 
+   TVector2 Muon_origin[12], Muon_tuned[12]; // this is for w/ and w/o tuneP 
    for (int imuon=0; imuon<nMuon; imuon++){
       if (Muon_highPtId[imuon]>=2 &&
          fabs(Muon_dxy[imuon])<0.02 &&
@@ -5634,6 +5634,7 @@ cut_numbers[2]++;
 cut_numbers[3]++;
    // Muon matched to trigger
    bool MatchedToTriggerMuon[12]; //although set it to 12(nMuons), we actually only fill the first several with selected muon.
+   for (int imuon=0; imuon<12; imuon++) MatchedToTriggerMuon[imuon]=0;
    int nMuonMatchedToTrigger=0;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)
    {
@@ -5649,10 +5650,11 @@ cut_numbers[3]++;
       if (MatchedToTriggerMuon[imuon]) nMuonMatchedToTrigger++;
    }
    if (nMuonMatchedToTrigger<1) return -1;
+
 cut_numbers[4]++;
    // Select Muon pairs
    int Mu1_num=-1, Mu2_num=-1;
-/*   bool HasMuonPairs=0;
+   bool HasMuonPairs=0;
    bool isZBoson=0;
    TLorentzVector ZPrime;
    float Zmass = 91.1876;
@@ -5678,38 +5680,11 @@ cut_numbers[4]++;
 
    if (isZBoson) return -1;
    if (!(HasMuonPairs)) return -1;
-   */
-
-      int leadingMu_idx = -1, subleadingMu_idx = -1;
-      float selectedPair_M = -1.0;
-      bool Zboson = false;
-      for ( unsigned int i=0; i<n_qualified_muons; i++ ) {
-        TVector3 mu_1(Selected_Muon[i].Px(),Selected_Muon[i].Py(),Selected_Muon[i].Pz());
-        for ( unsigned int j=i+1; j<n_qualified_muons; j++ ) {
-          if ( Selected_Muon_pdgId[i]+Selected_Muon_pdgId[j] != 0 ) continue; // Opposite sign, same flavor
-          if ( !(MatchedToTriggerMuon[i] || MatchedToTriggerMuon[j]) ) continue; // At least one muon in pair matched to HLT
-          TVector3 mu_2(Selected_Muon[j].Px(),Selected_Muon[j].Py(),Selected_Muon[j].Pz());
-          if (fabs(Selected_Muon[i].Angle(Selected_Muon[j].Vect())) >= (TMath::Pi()-0.02)) continue; // 3D angle between muons > pi - 0.02
-          float m_ll = (Selected_Muon[i]+Selected_Muon[j]).M();
-          if ( fabs(m_ll - 91.1876)<20.0 ) { // Reject event if it contains dimuon pair compatible with Z mass (within 20 GeV)
-            Zboson = true;
-            continue;
-          }
-          if ( selectedPair_M < 0.0 ) {
-            Mu1_num = Selected_Muon_index[i];
-            Mu2_num = Selected_Muon_index[j];
-            selectedPair_M = m_ll;
-          }
-        }
-        if ( Zboson ) break;
-      }
-      if ( selectedPair_M < 0.0 || Zboson ) return -1;
-
 cut_numbers[5]++;
 
    // Mmumu>175GeV
-//   if (ZPrime.M()<175) return -1;
-   if (selectedPair_M<175) return -1;
+   if (ZPrime.M()<175) return -1;
+//   if (selectedPair_M<175) return -1;
 cut_numbers[6]++;
    // No extra electrons
    bool hasExtraElectron=0;
@@ -5831,14 +5806,18 @@ cut_numbers[7]++;
       tight_point = 0.7100;
       medium_point = 0.2783;
       loose_point = 0.0490;
+   //   tight_point = 0.7246;
+   //   medium_point = 0.2770;
+   //   loose_point = 0.0494;
    }
    int n_tight_bjets=0, n_medium_bjets=0, n_fail_medium_bjets;
    TLorentzVector bjets_tight[86],bjets_medium[86];
+
    for (int ibjet=0; ibjet<nJet; ibjet++)
    {
       TLorentzVector bjet;
       if (Jet_jetId[ibjet]<=1) continue;
-      if (Jet_pt[ibjet]<20 || fabs(Jet_eta[ibjet])>2.5) continue;
+      if (Jet_pt[ibjet]<=20 || fabs(Jet_eta[ibjet])>=2.5) continue;
       bjet.SetPtEtaPhiM(Jet_pt[ibjet],Jet_eta[ibjet],Jet_phi[ibjet],Jet_mass[ibjet]);
       if (bjet.DeltaR(Selected_Muon[0])<0.4 || bjet.DeltaR(Selected_Muon[1])<0.4) continue;
       if (Jet_btagDeepFlavB[ibjet]>tight_point) 
@@ -5855,6 +5834,7 @@ cut_numbers[7]++;
       {
          n_fail_medium_bjets++;
       }
+//         }
    }
    /*
    cout<<n_tight_bjets<<" ";
@@ -5868,7 +5848,8 @@ cut_numbers[8]++;
    //we apply MET cut because if a large MET is aligned or anti-aligned with out muons/bjets, that means our muon/bjet(visible object) PT reconstruction maybe very bad
    TVector2 MET_tuned;
    MET_tuned.SetMagPhi(PuppiMET_pt, PuppiMET_phi);
-   MET_tuned = MET_tuned+Muon_origin[0]+Muon_origin[1]-Muon_tuned[0]-Muon_tuned[1];
+   for (int imuon=0; imuon<n_qualified_muons; imuon++)  MET_tuned = MET_tuned+Muon_origin[imuon]-Muon_tuned[imuon];
+//   MET_tuned = MET_tuned+Muon_origin[0]+Muon_origin[1]-Muon_tuned[0]-Muon_tuned[1];
 
    float minDPhi=5, maxDPhi=0;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)

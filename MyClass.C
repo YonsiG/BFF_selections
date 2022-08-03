@@ -65,5 +65,5 @@ void MyClass::Loop(TString year)
    cout<<"Mmumu>175: "<<cut_numbers[6]<<endl; 
    cout<<"Isotrack: "<<cut_numbers[7]<<endl; 
    cout<<">=1 bjet: "<<cut_numbers[8]<<endl; 
-   cout<<"mlb<175: "<<cut_numbers[9]<<endl; 
+   cout<<"MET>250 && (anti)aligned with l/b: "<<cut_numbers[9]<<endl; 
 }
