@@ -59,4 +59,11 @@ void MyClass::Loop(TString year)
    cout<<"HLT: "<<cut_numbers[0]<<endl; 
    cout<<"Trigger: "<<cut_numbers[1]<<endl; 
    cout<<"Noise: "<<cut_numbers[2]<<endl; 
+   cout<<"Muon: "<<cut_numbers[3]<<endl; 
+   cout<<"Muon match trigger: "<<cut_numbers[4]<<endl; 
+   cout<<"has muon pair: "<<cut_numbers[5]<<endl; 
+   cout<<"Mmumu>175: "<<cut_numbers[6]<<endl; 
+   cout<<"Isotrack: "<<cut_numbers[7]<<endl; 
+   cout<<">=1 bjet: "<<cut_numbers[8]<<endl; 
+   cout<<"mlb<175: "<<cut_numbers[9]<<endl; 
 }

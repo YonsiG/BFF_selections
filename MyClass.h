@@ -3683,6 +3683,8 @@ MyClass::MyClass(TTree *tree) : fChain(0)
 
       if (!f || !f->IsOpen()) {
          f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
+
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M700_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M1500_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
       }
@@ -5602,10 +5604,12 @@ cut_numbers[1]++;
       if (nJet>0 && Jet_pt[0]>13000.0) return -1;
       if (nMuon>0 && Muon_pt[0]>13000.0) return -1;
 cut_numbers[2]++;
+//same here
    // single Muon selection
    int n_qualified_muons=0;
    TLorentzVector Selected_Muon[12];
    int Selected_Muon_charge[12]; // stored for construct muon pairs and use opposite sign
+   int Selected_Muon_pdgId[12]; // stored for construct muon pairs and use opposite sign
    int Selected_Muon_index[12]; // store the index of qualified muons
    TVector2 Muon_origin[2], Muon_tuned[2]; // this is for w/ and w/o tuneP 
    for (int imuon=0; imuon<nMuon; imuon++){
@@ -5615,10 +5619,11 @@ cut_numbers[2]++;
          Muon_tunepRelPt[imuon]*Muon_pt[imuon]>53 && // here we are using TuneP pt for muons, this also affects the MET since the muon_pt is not accurate
          fabs(Muon_eta[imuon])<2.4 &&
          Muon_tkRelIso[imuon]<0.05 &&
-         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5)
+         Muon_tkRelIso[imuon]*Muon_pt[imuon]*Muon_tunepRelPt[imuon]<5)
       {
          Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
          Selected_Muon_charge[n_qualified_muons] = Muon_charge[imuon];
+         Selected_Muon_pdgId[n_qualified_muons] = Muon_pdgId[imuon];
          Selected_Muon_index[n_qualified_muons] = imuon;
          Muon_origin[n_qualified_muons].SetMagPhi(Muon_pt[imuon], Muon_phi[imuon]);
          Muon_tuned[n_qualified_muons].SetMagPhi(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_phi[imuon]);
@@ -5626,7 +5631,7 @@ cut_numbers[2]++;
       }
    }
    if (n_qualified_muons<2) return -1;
-return 1;
+cut_numbers[3]++;
    // Muon matched to trigger
    bool MatchedToTriggerMuon[12]; //although set it to 12(nMuons), we actually only fill the first several with selected muon.
    int nMuonMatchedToTrigger=0;
@@ -5644,32 +5649,68 @@ return 1;
       if (MatchedToTriggerMuon[imuon]) nMuonMatchedToTrigger++;
    }
    if (nMuonMatchedToTrigger<1) return -1;
-//different already
+cut_numbers[4]++;
    // Select Muon pairs
    int Mu1_num=-1, Mu2_num=-1;
-   bool HasMuonPairs=0;
+/*   bool HasMuonPairs=0;
+   bool isZBoson=0;
    TLorentzVector ZPrime;
+   float Zmass = 91.1876;
    for (int imuon1=0; imuon1<n_qualified_muons; imuon1++)
    {
       for (int imuon2=imuon1+1; imuon2<n_qualified_muons; imuon2++)
       {
-         if (Selected_Muon_charge[imuon1]+Selected_Muon_charge[imuon2] != 0) continue;  
+         ZPrime.SetPxPyPzE(0,0,0,0);
+         if (Selected_Muon_charge[imuon1]*Selected_Muon_charge[imuon2] > 0) continue;  
          if (!(MatchedToTriggerMuon[imuon1] || MatchedToTriggerMuon[imuon2])) continue;
-         if (fabs(Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect())) > (TMath::Pi()-0.02)) continue; //reduce cosmic ray background
+         if (fabs(Selected_Muon[imuon1].Angle(Selected_Muon[imuon2].Vect())) >= (TMath::Pi()-0.02)) continue; //reduce cosmic ray background
          ZPrime = Selected_Muon[imuon1]+Selected_Muon[imuon2];
+         if (fabs(ZPrime.M()-Zmass)<20) {isZBoson=1; break;}
+         if (HasMuonPairs==0)
+         {
+            Mu1_num = Selected_Muon_index[imuon1];
+            Mu2_num = Selected_Muon_index[imuon2];
+         }
          HasMuonPairs = 1;
-         Mu1_num = Selected_Muon_index[imuon1];
-         Mu2_num = Selected_Muon_index[imuon2];
-         break;
       }
-      if (HasMuonPairs) break;
+      if (isZBoson) break; //logic: if we find any ZBoson, discard this event
    }
-   if (71.1876 < ZPrime.M() && ZPrime.M()<111.1876) return -1;
+
+   if (isZBoson) return -1;
    if (!(HasMuonPairs)) return -1;
+   */
+
+      int leadingMu_idx = -1, subleadingMu_idx = -1;
+      float selectedPair_M = -1.0;
+      bool Zboson = false;
+      for ( unsigned int i=0; i<n_qualified_muons; i++ ) {
+        TVector3 mu_1(Selected_Muon[i].Px(),Selected_Muon[i].Py(),Selected_Muon[i].Pz());
+        for ( unsigned int j=i+1; j<n_qualified_muons; j++ ) {
+          if ( Selected_Muon_pdgId[i]+Selected_Muon_pdgId[j] != 0 ) continue; // Opposite sign, same flavor
+          if ( !(MatchedToTriggerMuon[i] || MatchedToTriggerMuon[j]) ) continue; // At least one muon in pair matched to HLT
+          TVector3 mu_2(Selected_Muon[j].Px(),Selected_Muon[j].Py(),Selected_Muon[j].Pz());
+          if (fabs(Selected_Muon[i].Angle(Selected_Muon[j].Vect())) >= (TMath::Pi()-0.02)) continue; // 3D angle between muons > pi - 0.02
+          float m_ll = (Selected_Muon[i]+Selected_Muon[j]).M();
+          if ( fabs(m_ll - 91.1876)<20.0 ) { // Reject event if it contains dimuon pair compatible with Z mass (within 20 GeV)
+            Zboson = true;
+            continue;
+          }
+          if ( selectedPair_M < 0.0 ) {
+            Mu1_num = Selected_Muon_index[i];
+            Mu2_num = Selected_Muon_index[j];
+            selectedPair_M = m_ll;
+          }
+        }
+        if ( Zboson ) break;
+      }
+      if ( selectedPair_M < 0.0 || Zboson ) return -1;
+
+cut_numbers[5]++;
 
    // Mmumu>175GeV
-   if (ZPrime.M()<175) return -1;
-
+//   if (ZPrime.M()<175) return -1;
+   if (selectedPair_M<175) return -1;
+cut_numbers[6]++;
    // No extra electrons
    bool hasExtraElectron=0;
    for (int ielectron=0; ielectron<nElectron; ielectron++)
@@ -5688,7 +5729,7 @@ return 1;
    bool hasExtraMuon = 0;
    for (int imuon=0; imuon<nMuon; imuon++)
    {
-      if (Muon_pt[imuon]>10 &&
+      if (Muon_tunepRelPt[imuon]*Muon_pt[imuon]>10 &&
          fabs(Muon_eta[imuon])<2.4 &&
          Muon_isGlobal[imuon] &&
          Muon_isTracker[imuon] &&
@@ -5696,7 +5737,7 @@ return 1;
          fabs(Muon_dxy[imuon])<0.02 &&
          fabs(Muon_dz[imuon])<0.1 &&
          Muon_tkRelIso[imuon]<0.05 &&
-         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5 &&
+         Muon_tkRelIso[imuon]*Muon_pt[imuon]*Muon_tunepRelPt[imuon]<5 &&
          imuon != Mu1_num &&
          imuon != Mu2_num
       ) {hasExtraMuon = 1;}
@@ -5769,7 +5810,7 @@ int count_muon2=0;
       }
    }
    if(hasIsoTrack) return -1;
-
+cut_numbers[7]++;
    // at least 1 bjet
    float tight_point, medium_point, loose_point;
    // working point recommendation as btag POG https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
@@ -5821,7 +5862,7 @@ int count_muon2=0;
    cout<<n_fail_medium_bjets<<endl;
    */
    if (n_tight_bjets<1) return -1;
-
+cut_numbers[8]++;
    //MET cut
    //since we use TuneP for muons, the MET is affected accordingly
    //we apply MET cut because if a large MET is aligned or anti-aligned with out muons/bjets, that means our muon/bjet(visible object) PT reconstruction maybe very bad
@@ -5846,7 +5887,7 @@ int count_muon2=0;
    {
       if (MET_tuned.Mod()>250) return -1;
    }
-
+cut_numbers[9]++;
    //min_mlb cut
    float min_mlb=999;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)
