@@ -5607,29 +5607,39 @@ cut_numbers[2]++;
 //same here
    // single Muon selection
    int n_qualified_muons=0;
+   int n_id_muons_forMET=0;
    TLorentzVector Selected_Muon[12];
    int Selected_Muon_charge[12]; // stored for construct muon pairs and use opposite sign
    int Selected_Muon_pdgId[12]; // stored for construct muon pairs and use opposite sign
    int Selected_Muon_index[12]; // store the index of qualified muons
    TVector2 Muon_origin[12], Muon_tuned[12]; // this is for w/ and w/o tuneP 
+
    for (int imuon=0; imuon<nMuon; imuon++){
       if (Muon_highPtId[imuon]>=2 &&
+         Muon_isGlobal[imuon] &&
+         Muon_isTracker[imuon] &&
          fabs(Muon_dxy[imuon])<0.02 &&
-         fabs(Muon_dz[imuon])<0.1 &&
-         Muon_tunepRelPt[imuon]*Muon_pt[imuon]>53 && // here we are using TuneP pt for muons, this also affects the MET since the muon_pt is not accurate
-         fabs(Muon_eta[imuon])<2.4 &&
-         Muon_tkRelIso[imuon]<0.05 &&
-         Muon_tkRelIso[imuon]*Muon_pt[imuon]*Muon_tunepRelPt[imuon]<5)
-      {
-         Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
-         Selected_Muon_charge[n_qualified_muons] = Muon_charge[imuon];
-         Selected_Muon_pdgId[n_qualified_muons] = Muon_pdgId[imuon];
-         Selected_Muon_index[n_qualified_muons] = imuon;
-         Muon_origin[n_qualified_muons].SetMagPhi(Muon_pt[imuon], Muon_phi[imuon]);
-         Muon_tuned[n_qualified_muons].SetMagPhi(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_phi[imuon]);
-         n_qualified_muons++;
-      }
+         fabs(Muon_dz[imuon])<0.1)
+         {
+            Muon_origin[n_id_muons_forMET].SetMagPhi(Muon_pt[imuon], Muon_phi[imuon]);
+            Muon_tuned[n_id_muons_forMET].SetMagPhi(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_phi[imuon]);
+            n_id_muons_forMET++;
+            // we want to correct MET for XY shift correction
+         if (Muon_tunepRelPt[imuon]*Muon_pt[imuon]>53 && // here we are using TuneP pt for muons, this also affects the MET since the muon_pt is not accurate
+            fabs(Muon_eta[imuon])<2.4 &&
+            Muon_tkRelIso[imuon]<0.05 &&
+            Muon_tkRelIso[imuon]*Muon_pt[imuon]*Muon_tunepRelPt[imuon]<5)
+            {
+            Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
+            Selected_Muon_charge[n_qualified_muons] = Muon_charge[imuon];
+            Selected_Muon_pdgId[n_qualified_muons] = Muon_pdgId[imuon];
+            Selected_Muon_index[n_qualified_muons] = imuon;
+            n_qualified_muons++;
+            }
+         }
    }
+
+
    if (n_qualified_muons<2) return -1;
 cut_numbers[3]++;
    // Muon matched to trigger
@@ -5658,6 +5668,7 @@ cut_numbers[4]++;
    bool isZBoson=0;
    TLorentzVector ZPrime;
    float Zmass = 91.1876;
+   float select_pair_M=-1;
    for (int imuon1=0; imuon1<n_qualified_muons; imuon1++)
    {
       for (int imuon2=imuon1+1; imuon2<n_qualified_muons; imuon2++)
@@ -5670,6 +5681,7 @@ cut_numbers[4]++;
          if (fabs(ZPrime.M()-Zmass)<20) {isZBoson=1; break;}
          if (HasMuonPairs==0)
          {
+            select_pair_M = ZPrime.M();
             Mu1_num = Selected_Muon_index[imuon1];
             Mu2_num = Selected_Muon_index[imuon2];
          }
@@ -5683,8 +5695,7 @@ cut_numbers[4]++;
 cut_numbers[5]++;
 
    // Mmumu>175GeV
-   if (ZPrime.M()<175) return -1;
-//   if (selectedPair_M<175) return -1;
+   if (select_pair_M<175) return -1;
 cut_numbers[6]++;
    // No extra electrons
    bool hasExtraElectron=0;
@@ -5718,34 +5729,6 @@ cut_numbers[6]++;
       ) {hasExtraMuon = 1;}
    }
    if(hasExtraMuon) return -1;
-/*
-//debug count muon
-int count_muon1=0;
-   for (int imuon=0; imuon<nMuon; imuon++){
-      if (Muon_highPtId[imuon]>=2 &&
-         fabs(Muon_dxy[imuon])<0.02 &&
-         fabs(Muon_dz[imuon])<0.1 &&
-         Muon_pt[imuon]>53 &&
-         fabs(Muon_eta[imuon])<2.4 &&
-         Muon_tkRelIso[imuon]<0.05 &&
-         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5)
-         {count_muon1++;cout<<imuon;}
-   }
-int count_muon2=0;
-   for (int imuon=0; imuon<nMuon; imuon++)
-   {
-      if (Muon_pt[imuon]>10 &&
-         fabs(Muon_eta[imuon])<2.4 &&
-         Muon_isGlobal[imuon] &&
-         Muon_isTracker[imuon] &&
-         Muon_highPtId[imuon]>=2 &&
-         fabs(Muon_dxy[imuon])<0.02 &&
-         fabs(Muon_dz[imuon])<0.1 &&
-         Muon_tkRelIso[imuon]<0.05 &&
-         Muon_tkRelIso[imuon]*Muon_pt[imuon]<5
-      ) {count_muon2++;cout<<imuon;}
-   }
-*/
 
    // No extra isotracks
    bool hasIsoTrack=0;
@@ -5848,26 +5831,26 @@ cut_numbers[8]++;
    //we apply MET cut because if a large MET is aligned or anti-aligned with out muons/bjets, that means our muon/bjet(visible object) PT reconstruction maybe very bad
    TVector2 MET_tuned;
    MET_tuned.SetMagPhi(PuppiMET_pt, PuppiMET_phi);
-   for (int imuon=0; imuon<n_qualified_muons; imuon++)  MET_tuned = MET_tuned+Muon_origin[imuon]-Muon_tuned[imuon];
-//   MET_tuned = MET_tuned+Muon_origin[0]+Muon_origin[1]-Muon_tuned[0]-Muon_tuned[1];
-
+   for (int imuon=0; imuon<n_id_muons_forMET; imuon++)  MET_tuned = MET_tuned+Muon_origin[imuon]-Muon_tuned[imuon];
    float minDPhi=5, maxDPhi=0;
    for (int imuon=0; imuon<n_qualified_muons; imuon++)
    {
-      float dPhi = TVector2::Phi_mpi_pi(MET_tuned.Phi()-Selected_Muon[imuon].Phi());
+      float dPhi = fabs(TVector2::Phi_mpi_pi(MET_tuned.Phi()-Selected_Muon[imuon].Phi()));
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }
    for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
    {
-      float dPhi = TVector2::Phi_mpi_pi(MET_tuned.Phi()-bjets_medium[ibjet].Phi());
+      float dPhi = fabs(TVector2::Phi_mpi_pi(MET_tuned.Phi()-bjets_medium[ibjet].Phi()));
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }
+
    if (minDPhi<0.3 || maxDPhi>TMath::Pi()-0.3)
    {
-      if (MET_tuned.Mod()>250) return -1;
+      if (MET_tuned.Mod()>250.0) return -1;
    }
+
 cut_numbers[9]++;
    //min_mlb cut
    float min_mlb=999;

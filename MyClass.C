@@ -41,7 +41,6 @@ void MyClass::Loop(TString year)
 //   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
 //   fChain->Process(selector,"",100);
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-//   for (Long64_t jentry=0; jentry<8000;jentry++) { //for a few numbers debugging
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   
