@@ -5585,22 +5585,16 @@ Int_t MyClass::Cut(Long64_t entry, TString year, Long64_t* cut_numbers)
    // returns  1 if entry is accepted.
    // returns -1 otherwise.
 
-   // some noise cleaning
-   if(!(year == "2016_v7")){
-   	if ( isinf(PuppiMET_ptJESUp) || isnan(PuppiMET_ptJESUp) || isinf(PuppiMET_phiJESUp) || isnan(PuppiMET_phiJESUp) ) return -1;
-   	if ( isinf(PuppiMET_ptJESDown) || isnan(PuppiMET_ptJESDown) || isinf(PuppiMET_phiJESDown) || isnan(PuppiMET_phiJESDown) ) return -1;
-   	if ( isinf(PuppiMET_ptJERUp) || isnan(PuppiMET_ptJERUp) || isinf(PuppiMET_phiJERUp) || isnan(PuppiMET_phiJERUp) ) return -1;
-   	if ( isinf(PuppiMET_ptJERDown) || isnan(PuppiMET_ptJERDown) || isinf(PuppiMET_phiJERDown) || isnan(PuppiMET_phiJERDown) ) return -1;
-   }
-
    // HLT cut
    bool HLT_pass=0;
    if ((year=="2016APV" || year=="2016nonAPV" || year=="2016_v7") && (HLT_Mu50 || HLT_TkMu50)) HLT_pass = 1;
    if ((year=="2017" || year=="2018") && (HLT_Mu50 || HLT_OldMu100 || HLT_TkMu100)) HLT_pass = 1;
    if (!HLT_pass) return -1;
 cut_numbers[0]++;
+
    // MET filters
    // applied according to https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#2018_2017_data_and_MC_UL
+   // in BFF paper, they didn't say they applied MET filters
    if (PV_npvsGood<1) return -1;
    if (!Flag_goodVertices) return -1; // this is actually redundant, we have npvsGood >=1 requirement
    if (!Flag_globalSuperTightHalo2016Filter) return -1;
@@ -5616,13 +5610,7 @@ cut_numbers[0]++;
       if (!Flag_hfNoisyHitsFilter) return -1;
    }
 cut_numbers[1]++;
-   // check that muons, jets, puppiMET are all valid numbers
-   	if (isinf(PuppiMET_pt)||isnan(PuppiMET_pt)) return -1;
-   	if (isinf(PuppiMET_phi)||isnan(PuppiMET_phi)) return -1;
-      if (nJet>0 && Jet_pt[0]>13000.0) return -1;
-      if (nMuon>0 && Muon_pt[0]>13000.0) return -1;
-cut_numbers[2]++;
-//same here
+
    // single Muon selection
    int n_qualified_muons=0;
    int n_id_muons_forMET=0;
@@ -5631,13 +5619,10 @@ cut_numbers[2]++;
    int Selected_Muon_pdgId[12]; // stored for construct muon pairs and use opposite sign
    int Selected_Muon_index[12]; // store the index of qualified muons
    TVector2 Muon_origin[12], Muon_tuned[12]; // this is for w/ and w/o tuneP 
-
+   int Mu1_num=-999;
+   int Mu2_num=-999;
    for (int imuon=0; imuon<nMuon; imuon++){
-      if (Muon_highPtId[imuon]>=2 &&
-         Muon_isGlobal[imuon] &&
-         Muon_isTracker[imuon] &&
-         fabs(Muon_dxy[imuon])<0.02 &&
-         fabs(Muon_dz[imuon])<0.1)
+      if (Muon_highPtId[imuon]>0) // 1:tracker high-pT, 2: global high-pT which includes tracker high-pT
          {
             Muon_origin[n_id_muons_forMET].SetMagPhi(Muon_pt[imuon], Muon_phi[imuon]);
             Muon_tuned[n_id_muons_forMET].SetMagPhi(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_phi[imuon]);
@@ -5645,21 +5630,167 @@ cut_numbers[2]++;
             // we want to correct MET for XY shift correction
          if (Muon_tunepRelPt[imuon]*Muon_pt[imuon]>53 && // here we are using TuneP pt for muons, this also affects the MET since the muon_pt is not accurate
             fabs(Muon_eta[imuon])<2.4 &&
-            Muon_tkRelIso[imuon]<0.05 &&
-            Muon_tkRelIso[imuon]*Muon_pt[imuon]*Muon_tunepRelPt[imuon]<5)
+            Muon_tkRelIso[imuon]<0.1)
             {
             Selected_Muon[n_qualified_muons].SetPtEtaPhiM(Muon_tunepRelPt[imuon]*Muon_pt[imuon], Muon_eta[imuon], Muon_phi[imuon], Muon_mass[imuon]);
             Selected_Muon_charge[n_qualified_muons] = Muon_charge[imuon];
             Selected_Muon_pdgId[n_qualified_muons] = Muon_pdgId[imuon];
             Selected_Muon_index[n_qualified_muons] = imuon;
             n_qualified_muons++;
+            if (Mu1_num<0) {Mu1_num = imuon; continue;}
+            if (Mu1_num>=0 && Mu2_num<0) Mu2_num = imuon;
             }
          }
    }
-
-
    if (n_qualified_muons<2) return -1;
+cut_numbers[2]++;
+
+   // No extra muons
+   bool hasExtraMuon = 0;
+   for (int imuon=0; imuon<nMuon; imuon++)
+   {
+      if (Muon_tunepRelPt[imuon]*Muon_pt[imuon]>10 &&
+         fabs(Muon_eta[imuon])<2.4 &&
+         Muon_highPtId[imuon]>0 &&
+         Muon_tkRelIso[imuon]<0.25 &&
+         imuon != Mu1_num &&
+         imuon != Mu2_num
+      ) {hasExtraMuon = 1;}
+   }
+//   cout<<Mu1_num<<" "<<Mu2_num<<endl;
+   if(hasExtraMuon) return -1;
 cut_numbers[3]++;
+
+   // No extra electrons
+   bool hasExtraElectron=0;
+   for (int ielectron=0; ielectron<nElectron; ielectron++)
+   {
+      if ( Electron_pt[ielectron]>10 &&
+         fabs(Electron_eta[ielectron])<2.4 &&
+         Electron_mvaFall17V2Iso_WPL[ielectron]>0
+      ) hasExtraElectron = 1;
+   }
+   if (hasExtraElectron) return -1;
+cut_numbers[4]++;
+
+   // 1 or 2 light or bjets
+   float tight_point, medium_point, loose_point;
+   // working point recommendation as btag POG https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
+   if (year=="2016_v7") 
+   {
+      tight_point = 0.7221;
+      medium_point = 0.3093;
+      loose_point = 0.0614;
+   }
+   if (year=="2016APV") 
+   {
+      tight_point = 0.6502;
+      medium_point = 0.2598;
+      loose_point = 0.0508;
+   }
+   if (year == "2016nonAPV") 
+   {
+      tight_point = 0.6377;
+      medium_point = 0.2489;
+      loose_point = 0.0480;
+   }
+   if (year=="2017") 
+   {
+      tight_point = 0.7476;
+      medium_point = 0.3040;
+      loose_point = 0.0532;
+   }
+   if (year=="2018") 
+   {
+      tight_point = 0.7100;
+      medium_point = 0.2783;
+      loose_point = 0.0490;
+   }
+   int n_bjets=0, n_light_jets=0;
+   TLorentzVector Selected_bjets[86],Selected_light_Jet[86];
+
+// bjets
+   for (int ibjet=0; ibjet<nJet; ibjet++)
+   {
+      TLorentzVector bjet;
+      if (Jet_jetId[ibjet]<=3) continue; //jetId==7 tightLeptVeto WP
+      if (Jet_puId[ibjet]<7) continue; //puId ==7 tight puId
+      if (Jet_pt[ibjet]<=20 || fabs(Jet_eta[ibjet])>=2.4) continue;
+      bjet.SetPtEtaPhiM(Jet_pt[ibjet],Jet_eta[ibjet],Jet_phi[ibjet],Jet_mass[ibjet]);
+      if (bjet.DeltaR(Selected_Muon[0])<0.4 || bjet.DeltaR(Selected_Muon[1])<0.4) continue;
+      if (Jet_btagDeepFlavB[ibjet]>medium_point) 
+      {
+         Selected_bjets[n_bjets] = bjet;
+         n_bjets++;
+      }
+   }
+// light jets
+   for (int ilightjet=0; ilightjet<nJet; ilightjet++)
+   {
+      TLorentzVector light_jet;
+      if (Jet_jetId[ilightjet]<=3) continue; //jetId==7 tightLeptVeto WP
+      if (Jet_puId[ilightjet]<7) continue; //puId ==7 tight puId
+      if (Jet_pt[ilightjet]<=30 || fabs(Jet_eta[ilightjet])>=2.4) continue;
+      light_jet.SetPtEtaPhiM(Jet_pt[ilightjet],Jet_eta[ilightjet],Jet_phi[ilightjet],Jet_mass[ilightjet]);
+      if (light_jet.DeltaR(Selected_Muon[0])<0.4 || light_jet.DeltaR(Selected_Muon[1])<0.4) continue;
+      if (Jet_btagDeepFlavB[ilightjet]<=medium_point) 
+      {
+         Selected_light_Jet[n_light_jets] = light_jet;
+         n_light_jets++;
+      }
+   }
+   int category=0;
+   if (n_bjets>=1 && (n_bjets+n_light_jets)==2) category=1;
+   if (n_bjets==1 && n_light_jets==0) category=2;
+   if (category==0) return -1;
+cut_numbers[5]++;
+
+   // Mmumu>120GeV
+   float M_mumu = (Selected_Muon[0]+Selected_Muon[1]).M();
+   if (M_mumu<120) return -1;
+cut_numbers[6]++;
+
+   //HT-LT
+   float HT=0;
+   float LT=0;
+   for (int ibjet=0; ibjet<n_bjets; ibjet++) HT+=Selected_bjets[ibjet].Pt();
+   for (int ilightjet=0; ilightjet<n_light_jets; ilightjet++) HT+=Selected_light_Jet[ilightjet].Pt();
+   for (int imuon=0; imuon<n_qualified_muons; imuon++) LT+=Selected_Muon[imuon].Pt();
+   bool HTLT=0;
+   if (category==1) HTLT = (HT-LT)<(-1.2*M_mumu+85);
+   if (category==2) HTLT = (HT-LT)<(-1.0*M_mumu+250);
+   if (!HTLT) return -1;
+cut_numbers[7]++;
+
+   //MET/Mll
+   //PF MET: MET_pt, MET_phi
+   bool MET_Rel=0;
+   if (category==1) MET_Rel = (MET_pt/M_mumu)<(85*pow(M_mumu,-1.08));
+   if (category==2) MET_Rel = (MET_pt/M_mumu)<(290*pow(M_mumu,-1.28));
+   if (!MET_Rel) return -1;
+cut_numbers[8]++;
+
+   return category;
+
+   //in BFF paper, they didn't say they did noise cleaning
+/*
+   // some noise cleaning
+   if(!(year == "2016_v7")){
+   	if ( isinf(PuppiMET_ptJESUp) || isnan(PuppiMET_ptJESUp) || isinf(PuppiMET_phiJESUp) || isnan(PuppiMET_phiJESUp) ) return -1;
+   	if ( isinf(PuppiMET_ptJESDown) || isnan(PuppiMET_ptJESDown) || isinf(PuppiMET_phiJESDown) || isnan(PuppiMET_phiJESDown) ) return -1;
+   	if ( isinf(PuppiMET_ptJERUp) || isnan(PuppiMET_ptJERUp) || isinf(PuppiMET_phiJERUp) || isnan(PuppiMET_phiJERUp) ) return -1;
+   	if ( isinf(PuppiMET_ptJERDown) || isnan(PuppiMET_ptJERDown) || isinf(PuppiMET_phiJERDown) || isnan(PuppiMET_phiJERDown) ) return -1;
+   }
+*/
+
+/*
+   // check that muons, jets, puppiMET are all valid numbers
+   	if (isinf(PuppiMET_pt)||isnan(PuppiMET_pt)) return -1;
+   	if (isinf(PuppiMET_phi)||isnan(PuppiMET_phi)) return -1;
+      if (nJet>0 && Jet_pt[0]>13000.0) return -1;
+      if (nMuon>0 && Muon_pt[0]>13000.0) return -1;
+*/
+/*
    // Muon matched to trigger
    bool MatchedToTriggerMuon[12]; //although set it to 12(nMuons), we actually only fill the first several with selected muon.
    for (int imuon=0; imuon<12; imuon++) MatchedToTriggerMuon[imuon]=0;
@@ -5712,42 +5843,6 @@ cut_numbers[4]++;
    if (!(HasMuonPairs)) return -1;
 cut_numbers[5]++;
 
-   // Mmumu>175GeV
-   if (select_pair_M<175) return -1;
-cut_numbers[6]++;
-   // No extra muons
-   bool hasExtraMuon = 0;
-   for (int imuon=0; imuon<nMuon; imuon++)
-   {
-      if (Muon_tunepRelPt[imuon]*Muon_pt[imuon]>10 &&
-         fabs(Muon_eta[imuon])<2.4 &&
-         Muon_isGlobal[imuon] && Muon_isTracker[imuon] &&
-         Muon_highPtId[imuon]>=2 &&
-         fabs(Muon_dxy[imuon])<0.02 &&
-         fabs(Muon_dz[imuon])<0.1 &&
-         Muon_tkRelIso[imuon]<0.05 &&
-         Muon_tkRelIso[imuon]*Muon_pt[imuon]*Muon_tunepRelPt[imuon]<5.0 &&
-         imuon != Mu1_num &&
-         imuon != Mu2_num
-      ) {hasExtraMuon = 1;}
-   }
-   if(hasExtraMuon) return -1;
-cut_numbers[10]++;
-
-   // No extra electrons
-   bool hasExtraElectron=0;
-   for (int ielectron=0; ielectron<nElectron; ielectron++)
-   {
-      if ( Electron_pt[ielectron]>10 &&
-         fabs(Electron_eta[ielectron])<2.5 &&
-         Electron_cutBased[ielectron]>0 &&
-         Electron_miniPFRelIso_all[ielectron]<0.1 &&
-         fabs(Electron_dxy[ielectron])<0.2 &&
-         fabs(Electron_dz[ielectron])<0.5 
-      ) hasExtraElectron = 1;
-   }
-   if (hasExtraElectron) return -1;
-cut_numbers[11]++;
 
    // No extra isotracks
    bool hasIsoTrack=0;
@@ -5794,66 +5889,7 @@ cut_numbers[12]++;
    }
    if(hasIsoTrack) return -1;
 cut_numbers[7]++;
-   // at least 1 bjet
-   float tight_point, medium_point, loose_point;
-   // working point recommendation as btag POG https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
-   if (year=="2016_v7") 
-   {
-      tight_point = 0.7221;
-      medium_point = 0.3093;
-      loose_point = 0.0614;
-   }
-   if (year=="2016APV") 
-   {
-      tight_point = 0.6502;
-      medium_point = 0.2598;
-      loose_point = 0.0508;
-   }
-   if (year == "2016nonAPV") 
-   {
-      tight_point = 0.6377;
-      medium_point = 0.2489;
-      loose_point = 0.0480;
-   }
-   if (year=="2017") 
-   {
-      tight_point = 0.7476;
-      medium_point = 0.3040;
-      loose_point = 0.0532;
-   }
-   if (year=="2018") 
-   {
-      tight_point = 0.7100;
-      medium_point = 0.2783;
-      loose_point = 0.0490;
-   }
-   int n_tight_bjets=0, n_medium_bjets=0, n_fail_medium_bjets;
-   TLorentzVector bjets_tight[86],bjets_medium[86];
 
-   for (int ibjet=0; ibjet<nJet; ibjet++)
-   {
-      TLorentzVector bjet;
-      if (Jet_jetId[ibjet]<=1) continue;
-      if (Jet_pt[ibjet]<=20 || fabs(Jet_eta[ibjet])>=2.5) continue;
-      bjet.SetPtEtaPhiM(Jet_pt[ibjet],Jet_eta[ibjet],Jet_phi[ibjet],Jet_mass[ibjet]);
-      if (bjet.DeltaR(Selected_Muon[0])<0.4 || bjet.DeltaR(Selected_Muon[1])<0.4) continue;
-      if (Jet_btagDeepFlavB[ibjet]>tight_point) 
-      {
-         bjets_tight[n_tight_bjets] = bjet;
-         n_tight_bjets++;
-      }
-      if (Jet_btagDeepFlavB[ibjet]>medium_point) 
-      {
-         bjets_medium[n_medium_bjets] = bjet;
-         n_medium_bjets++;
-      }
-      if (Jet_btagDeepFlavB[ibjet]<medium_point) 
-      {
-         n_fail_medium_bjets++;
-      }
-   }
-   if (n_tight_bjets<1) return -1;
-cut_numbers[8]++;
    //MET cut
    //since we use TuneP for muons, the MET is affected accordingly
    //we apply MET cut because if a large MET is aligned or anti-aligned with out muons/bjets, that means our muon/bjet(visible object) PT reconstruction maybe very bad
@@ -5869,7 +5905,7 @@ cut_numbers[8]++;
    }
    for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
    {
-      float dPhi = fabs(TVector2::Phi_mpi_pi(MET_tuned.Phi()-bjets_medium[ibjet].Phi()));
+      float dPhi = fabs(TVector2::Phi_mpi_pi(MET_tuned.Phi()-Selected_Jet[ibjet].Phi()));
       if (dPhi<minDPhi) minDPhi = dPhi;
       if (dPhi>maxDPhi) maxDPhi = dPhi;
    }
@@ -5886,7 +5922,7 @@ cut_numbers[9]++;
    {
       for (int ibjet=0; ibjet<n_medium_bjets; ibjet++)
       {
-         int mlb = (Selected_Muon[imuon]+bjets_medium[ibjet]).M();
+         int mlb = (Selected_Muon[imuon]+Selected_Jet[ibjet]).M();
          if (mlb<min_mlb) min_mlb = mlb;
       }
    }
@@ -5894,6 +5930,6 @@ cut_numbers[9]++;
 
    // return the number of bjets as categorization
    return n_medium_bjets;
-//   return 1;
+*/
 }
 #endif // #ifdef MyClass_cxx

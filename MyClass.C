@@ -34,38 +34,35 @@ void MyClass::Loop(TString year)
    Long64_t nentries = fChain->GetEntriesFast();
 
    Long64_t nbytes = 0, nb = 0;
-   Long64_t total_numbers = 0, Nbjet1=0, Nbjet2=0;
+   Long64_t total_numbers = 0, jet1=0, jet2=0;
    Long64_t cut_numbers[13];
    for(Long64_t i=0; i<13; i++) cut_numbers[i]=0;
 
 //   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
 //   fChain->Process(selector,"",100);
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+//   for (Long64_t jentry=0; jentry<200;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   
       nbytes += nb;  
       int Cut_Return = Cut(ientry, year, cut_numbers);   
       if (Cut_Return > 0) {cout<<jentry<<endl; total_numbers++;} 
-      if (Cut_Return == 1) Nbjet1++;
-      if (Cut_Return >=2) Nbjet2++;
+      if (Cut_Return == 1) jet2++;
+      if (Cut_Return == 2) jet1++;
       if (Cut_Return < 0) continue;
    }
    cout<<"Nentries: "<<nentries<<endl;;
    cout<<"Pass Cut: "<<total_numbers<<endl;
-   cout<<"Nb=1: "<<Nbjet1<<endl;
-   cout<<"Nb>=2: "<<Nbjet2<<endl;
+   cout<<"N jet=1: "<<jet1<<endl;
+   cout<<"N jet=2: "<<jet2<<endl;
    cout<<"HLT: "<<cut_numbers[0]<<endl; 
-   cout<<"Noise cleaning: "<<cut_numbers[1]<<endl; 
-   cout<<"Nan/Inf: "<<cut_numbers[2]<<endl; 
-   cout<<"Muon: "<<cut_numbers[3]<<endl; 
-   cout<<"Muon match trigger: "<<cut_numbers[4]<<endl; 
-   cout<<"has muon pair: "<<cut_numbers[5]<<endl; 
-   cout<<"Mmumu>175: "<<cut_numbers[6]<<endl; 
-   cout<<"Iso muon: "<<cut_numbers[10]<<endl; 
-   cout<<"Iso electron: "<<cut_numbers[11]<<endl; 
-   cout<<"Iso lep: "<<cut_numbers[12]<<endl; 
-   cout<<"Isotrack: "<<cut_numbers[7]<<endl; 
-   cout<<">=1 bjet: "<<cut_numbers[8]<<endl; 
-   cout<<"MET>250 && (anti)aligned with l/b: "<<cut_numbers[9]<<endl; 
+   cout<<"MET Noise cleaning: "<<cut_numbers[1]<<endl; 
+   cout<<">=2 Muon: "<<cut_numbers[2]<<endl; 
+   cout<<"extra muon cleaning: "<<cut_numbers[3]<<endl; 
+   cout<<"extra electron cleaning: "<<cut_numbers[4]<<endl; 
+   cout<<"1 or 2 b jet category: "<<cut_numbers[5]<<endl; 
+   cout<<"Mmumu>125: "<<cut_numbers[6]<<endl; 
+   cout<<"HT-LT: "<<cut_numbers[7]<<endl; 
+   cout<<"MET/mll: "<<cut_numbers[8]<<endl; 
 }
