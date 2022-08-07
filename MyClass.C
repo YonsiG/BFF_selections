@@ -35,8 +35,8 @@ void MyClass::Loop(TString year)
 
    Long64_t nbytes = 0, nb = 0;
    Long64_t total_numbers = 0, Nbjet1=0, Nbjet2=0;
-   Long64_t cut_numbers[11];
-   for(Long64_t i=0; i<11; i++) cut_numbers[i]=0;
+   Long64_t cut_numbers[13];
+   for(Long64_t i=0; i<13; i++) cut_numbers[i]=0;
 
 //   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
 //   fChain->Process(selector,"",100);
@@ -56,12 +56,15 @@ void MyClass::Loop(TString year)
    cout<<"Nb=1: "<<Nbjet1<<endl;
    cout<<"Nb>=2: "<<Nbjet2<<endl;
    cout<<"HLT: "<<cut_numbers[0]<<endl; 
-   cout<<"Trigger: "<<cut_numbers[1]<<endl; 
-   cout<<"Noise: "<<cut_numbers[2]<<endl; 
+   cout<<"Noise cleaning: "<<cut_numbers[1]<<endl; 
+   cout<<"Nan/Inf: "<<cut_numbers[2]<<endl; 
    cout<<"Muon: "<<cut_numbers[3]<<endl; 
    cout<<"Muon match trigger: "<<cut_numbers[4]<<endl; 
    cout<<"has muon pair: "<<cut_numbers[5]<<endl; 
    cout<<"Mmumu>175: "<<cut_numbers[6]<<endl; 
+   cout<<"Iso muon: "<<cut_numbers[10]<<endl; 
+   cout<<"Iso electron: "<<cut_numbers[11]<<endl; 
+   cout<<"Iso lep: "<<cut_numbers[12]<<endl; 
    cout<<"Isotrack: "<<cut_numbers[7]<<endl; 
    cout<<">=1 bjet: "<<cut_numbers[8]<<endl; 
    cout<<"MET>250 && (anti)aligned with l/b: "<<cut_numbers[9]<<endl; 
