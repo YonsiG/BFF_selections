@@ -4,7 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void MyClass::Loop(TString year)
+void MyClass::Loop(TString year, Int_t Mass, Bool_t Delta_bs1p0)
 {
 //   In a ROOT session, you can do:
 //      root> .L MyClass.C
@@ -33,29 +33,33 @@ void MyClass::Loop(TString year)
 
    Long64_t nentries = fChain->GetEntriesFast();
 
+   Float_t lumi=137.6;
+   Float_t xsection=1, genSumWeight=1;
    Long64_t nbytes = 0, nb = 0;
    Long64_t total_numbers = 0, jet1=0, jet2=0;
+   Float_t weighted_total = 0, weighted_select=0, weighted_jet1=0, weighted_jet2=0; 
    Long64_t cut_numbers[13];
-   for(Long64_t i=0; i<13; i++) cut_numbers[i]=0;
+   for (Long64_t i=0; i<13; i++) cut_numbers[i]=0;
+//   if (year=="2016_v7" && Mass == 250) {xsection = 122.5; genSumWeight = 511129;}
+   if (year=="2016_v7" && Mass == 250 && Delta_bs1p0 == 0) {xsection = 122.5; genSumWeight = 511129;}
+   if (year=="2016_v7" && Mass == 350 && Delta_bs1p0 == 0) {xsection = 31; genSumWeight = 470696;}
+   if (year=="2016_v7" && Mass == 350 && Delta_bs1p0 == 1) {xsection = 165.8; genSumWeight = 476490;}
+   if (year=="2016_v7" && Mass == 500 && Delta_bs1p0 == 0) {xsection = 6.4; genSumWeight = 421806;}      
 
-//   MySelector *selector = (MySelector *)TSelector::GetSelector("MySelector.C+");
-//   fChain->Process(selector,"",100);
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-//   for (Long64_t jentry=0; jentry<200;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   
       nbytes += nb;  
-      int Cut_Return = Cut(ientry, year, cut_numbers);   
-      if (Cut_Return > 0) {cout<<jentry<<endl; total_numbers++;} 
-      if (Cut_Return == 1) jet2++;
-      if (Cut_Return == 2) jet1++;
+      genWeight = genWeight*lumi*xsection/genSumWeight;
+      weighted_total+=genWeight;
+      int Cut_Return = Cut(ientry, year, Mass, cut_numbers);   
+      if (Cut_Return > 0) {cout<<jentry<<endl; total_numbers++; weighted_select+=genWeight;} 
+      if (Cut_Return == 1) {jet2++; weighted_jet2+=genWeight;}
+      if (Cut_Return == 2) {jet1++; weighted_jet1+=genWeight;}
       if (Cut_Return < 0) continue;
    }
    cout<<"Nentries: "<<nentries<<endl;;
-   cout<<"Pass Cut: "<<total_numbers<<endl;
-   cout<<"N jet=1: "<<jet1<<endl;
-   cout<<"N jet=2: "<<jet2<<endl;
    cout<<"HLT: "<<cut_numbers[0]<<endl; 
    cout<<"MET Noise cleaning: "<<cut_numbers[1]<<endl; 
    cout<<">=2 Muon: "<<cut_numbers[2]<<endl; 
@@ -65,4 +69,11 @@ void MyClass::Loop(TString year)
    cout<<"Mmumu>125: "<<cut_numbers[6]<<endl; 
    cout<<"HT-LT: "<<cut_numbers[7]<<endl; 
    cout<<"MET/mll: "<<cut_numbers[8]<<endl; 
+   cout<<"Pass Cut: "<<total_numbers<<endl;
+   cout<<"N jet=1: "<<jet1<<endl;
+   cout<<"N jet=2: "<<jet2<<endl;
+   cout<<"weighted total: "<<weighted_total<<endl;
+   cout<<"weighted selected: "<<weighted_select<<endl;
+   cout<<"weighted N jet=1: "<<weighted_jet1<<endl;
+   cout<<"weighted N jet=2: "<<weighted_jet2<<endl;
 }

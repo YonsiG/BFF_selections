@@ -3659,11 +3659,11 @@ public :
 
    MyClass(TTree *tree=0);
    virtual ~MyClass();
-   virtual Int_t    Cut(Long64_t entry, TString year, Long64_t* cut_numbers);
+   virtual Int_t    Cut(Long64_t entry, TString year, Int_t Mass, Long64_t* cut_numbers);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree, TString year);
-   virtual void     Loop(TString year);
+   virtual void     Loop(TString year, Int_t Mass, Bool_t Delta_bs1p0);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -3682,14 +3682,20 @@ MyClass::MyClass(TTree *tree) : fChain(0)
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2017
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2016APV
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2016 nonAPV
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//BFF
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//BFF 250GeV
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 350GeV
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_dbs1p0_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 350GeV
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_500_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 500GeV
  
       if (!f || !f->IsOpen()) {
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");// 2016APV
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");// 2016 nonAPV
-         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//BFF
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//BFF 250GeV
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 350GeV
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_dbs1p0_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 500GeV
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_500_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 500GeV
       }
       f->GetObject("Events",tree);
 
@@ -5578,7 +5584,7 @@ void MyClass::Show(Long64_t entry)
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t MyClass::Cut(Long64_t entry, TString year, Long64_t* cut_numbers)
+Int_t MyClass::Cut(Long64_t entry, TString year, Int_t Mass, Long64_t* cut_numbers)
 {
    // This is where we apply all the selections of the analysis from the loop 
    // This function may be called from Loop.
@@ -5714,7 +5720,7 @@ cut_numbers[4]++;
    {
       TLorentzVector bjet;
       if (Jet_jetId[ibjet]<=3) continue; //jetId==7 tightLeptVeto WP
-      if (Jet_puId[ibjet]<7) continue; //puId ==7 tight puId
+      if (Jet_puId[ibjet]<7 && Jet_pt[ibjet]<50) continue; //puId ==7 tight puId, only effective for jet_pt<50
       if (Jet_pt[ibjet]<=20 || fabs(Jet_eta[ibjet])>=2.4) continue;
       bjet.SetPtEtaPhiM(Jet_pt[ibjet],Jet_eta[ibjet],Jet_phi[ibjet],Jet_mass[ibjet]);
       if (bjet.DeltaR(Selected_Muon[0])<0.4 || bjet.DeltaR(Selected_Muon[1])<0.4) continue;
@@ -5729,7 +5735,7 @@ cut_numbers[4]++;
    {
       TLorentzVector light_jet;
       if (Jet_jetId[ilightjet]<=3) continue; //jetId==7 tightLeptVeto WP
-      if (Jet_puId[ilightjet]<7) continue; //puId ==7 tight puId
+      if (Jet_puId[ilightjet]<7 && Jet_pt[ilightjet]<50 ) continue; //puId ==7 tight puId
       if (Jet_pt[ilightjet]<=30 || fabs(Jet_eta[ilightjet])>=2.4) continue;
       light_jet.SetPtEtaPhiM(Jet_pt[ilightjet],Jet_eta[ilightjet],Jet_phi[ilightjet],Jet_mass[ilightjet]);
       if (light_jet.DeltaR(Selected_Muon[0])<0.4 || light_jet.DeltaR(Selected_Muon[1])<0.4) continue;
@@ -5750,6 +5756,24 @@ cut_numbers[5]++;
    if (M_mumu<120) return -1;
 cut_numbers[6]++;
 
+   if (Mass==250)
+   {
+      if (M_mumu>275) return -1;
+      if (M_mumu<225) return -1;
+   }
+
+   if (Mass==350)
+   {
+      if (M_mumu>385) return -1;
+      if (M_mumu<315) return -1;
+   }
+
+   if (Mass==500)
+   {
+      if (M_mumu>550) return -1;
+      if (M_mumu<450) return -1;
+   }
+
    //HT-LT
    float HT=0;
    float LT=0;
@@ -5757,8 +5781,8 @@ cut_numbers[6]++;
    for (int ilightjet=0; ilightjet<n_light_jets; ilightjet++) HT+=Selected_light_Jet[ilightjet].Pt();
    for (int imuon=0; imuon<n_qualified_muons; imuon++) LT+=Selected_Muon[imuon].Pt();
    bool HTLT=0;
-   if (category==1) HTLT = (HT-LT)<(-1.2*M_mumu+85);
-   if (category==2) HTLT = (HT-LT)<(-1.0*M_mumu+250);
+   if (category==1) HTLT = (HT-LT)<(-0.56*M_mumu+124);
+   if (category==2) HTLT = (HT-LT)<(-0.43*M_mumu+47);
    if (!HTLT) return -1;
 cut_numbers[7]++;
 
