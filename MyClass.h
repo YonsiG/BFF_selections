@@ -3663,7 +3663,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree, TString year);
-   virtual void     Loop(TString year, Int_t Mass, Bool_t Delta_bs1p0);
+   virtual void     Loop(TString year, Int_t Mass, Int_t Delta_bs1p0);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -3682,20 +3682,24 @@ MyClass::MyClass(TTree *tree) : fChain(0)
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2017
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2016APV
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root"); // 2016 nonAPV
-//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//BFF 250GeV
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 250GeV
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 350GeV
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_dbs1p0_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 350GeV
 //      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_500_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 500GeV
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8_ext2-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//DY v7
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//ttbar v7
  
       if (!f || !f->IsOpen()) {
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");// 2016APV
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/ZPrimeToMuMuSB_M200_bestfit_TuneCP5_13TeV_Allanach_Y3_5f_madgraph_pythia8_NoPSWgts_RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2_private_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");// 2016 nonAPV
-//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//BFF 250GeV
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_250_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 250GeV
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 350GeV
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_350_dbs1p0_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 500GeV
 //         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/BFFZprimeToMuMu_M_500_TuneCUETP8M1_13TeV-madgraph-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM/merged/merged.root");//BFF 500GeV
+//         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8_ext2-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//DY v7
+         f = new TFile("/ceph/cms/store/user/evourlio/skimOutput/skim2mu_1muPt50_1Mll100_allBranches_allFiles/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16NanoAODv7-PUMoriond17_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1_NANOAODSIM_skim2mu_1muPt50_1Mll100_allBranches_allFiles/merged/merged.root");//ttbar v7
       }
       f->GetObject("Events",tree);
 
@@ -5649,6 +5653,7 @@ cut_numbers[1]++;
          }
    }
    if (n_qualified_muons<2) return -1;
+   if ((Selected_Muon_charge[0]+Selected_Muon_charge[1])!=0) return -1;
 cut_numbers[2]++;
 
    // No extra muons
@@ -5720,7 +5725,8 @@ cut_numbers[4]++;
    {
       TLorentzVector bjet;
       if (Jet_jetId[ibjet]<=3) continue; //jetId==7 tightLeptVeto WP
-      if (Jet_puId[ibjet]<7 && Jet_pt[ibjet]<50) continue; //puId ==7 tight puId, only effective for jet_pt<50
+      if (Jet_puId[ibjet]<7 && Jet_pt[ibjet]<=50) continue; //puId ==7 tight puId, only effective for jet_pt<50
+//      if (!(Jet_puId[ibjet] & 1) && Jet_pt[ibjet]<=50) continue;
       if (Jet_pt[ibjet]<=20 || fabs(Jet_eta[ibjet])>=2.4) continue;
       bjet.SetPtEtaPhiM(Jet_pt[ibjet],Jet_eta[ibjet],Jet_phi[ibjet],Jet_mass[ibjet]);
       if (bjet.DeltaR(Selected_Muon[0])<0.4 || bjet.DeltaR(Selected_Muon[1])<0.4) continue;
@@ -5789,8 +5795,10 @@ cut_numbers[7]++;
    //MET/Mll
    //PF MET: MET_pt, MET_phi
    bool MET_Rel=0;
-   if (category==1) MET_Rel = (MET_pt/M_mumu)<(85*pow(M_mumu,-1.08));
-   if (category==2) MET_Rel = (MET_pt/M_mumu)<(290*pow(M_mumu,-1.28));
+   if (category==1) MET_Rel = (MET_pt/M_mumu)<(67*pow(M_mumu,-1.04)); //2jets
+   if (category==2) MET_Rel = (MET_pt/M_mumu)<(223*pow(M_mumu,-1.23)); //1jet
+//   if (category==1) MET_Rel = (MET_pt/M_mumu)<(85*pow(M_mumu,-1.08));
+//   if (category==2) MET_Rel = (MET_pt/M_mumu)<(290*pow(M_mumu,-1.28));
    if (!MET_Rel) return -1;
 cut_numbers[8]++;
 

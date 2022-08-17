@@ -4,7 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void MyClass::Loop(TString year, Int_t Mass, Bool_t Delta_bs1p0)
+void MyClass::Loop(TString year, Int_t Mass, Int_t Delta_bs1p0)
 {
 //   In a ROOT session, you can do:
 //      root> .L MyClass.C
@@ -45,7 +45,8 @@ void MyClass::Loop(TString year, Int_t Mass, Bool_t Delta_bs1p0)
    if (year=="2016_v7" && Mass == 350 && Delta_bs1p0 == 0) {xsection = 31; genSumWeight = 470696;}
    if (year=="2016_v7" && Mass == 350 && Delta_bs1p0 == 1) {xsection = 165.8; genSumWeight = 476490;}
    if (year=="2016_v7" && Mass == 500 && Delta_bs1p0 == 0) {xsection = 6.4; genSumWeight = 421806;}      
-
+   if (year=="2016_v7" && Delta_bs1p0 == 2) {xsection = 5929*1000; genSumWeight = 1.89714e+12;} //DY v7
+   if (year=="2016_v7" && Delta_bs1p0 == 3) {xsection = 76.7*1000; genSumWeight = 7.91409e+07;} //ttbar v7
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
